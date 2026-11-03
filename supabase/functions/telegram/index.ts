@@ -17,6 +17,14 @@ const bot = new Bot(TELEGRAM_TOKEN);
 
 const REPLY_TEXT = "привет это чат-бот Dan Games";
 
+bot.catch((err) => {
+  const ctx = err.ctx;
+  console.error(
+    `Ошибка при обработке update_id=${ctx.update.update_id}:`,
+    err.error,
+  );
+});
+
 bot.command("start", (ctx) => ctx.reply(REPLY_TEXT));
 bot.command("chat", (ctx) => ctx.reply(REPLY_TEXT));
 
