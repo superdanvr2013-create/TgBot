@@ -17,24 +17,11 @@ const bot = new Bot(TELEGRAM_TOKEN);
 
 const REPLY_TEXT = "привет это чат-бот Dan Games";
 
-bot.catch((err) => {
-  const ctx = err.ctx;
-  console.error(
-    `Ошибка при обработке update_id=${ctx.update.update_id}:`,
-    err.error,
-  );
-});
-
 bot.command("start", (ctx) => ctx.reply(REPLY_TEXT));
 bot.command("chat", (ctx) => ctx.reply(REPLY_TEXT));
 
-// Любое другое текстовое сообщение (вопрос в чате) — тот же ответ.
-// Команды не трогаем: они уже обработаны выше.
-bot.on("message:text", (ctx) => {
-  const text = ctx.message?.text ?? "";
-  if (text.startsWith("/")) return;
-  return ctx.reply(REPLY_TEXT);
-});
+// Любой другой текст (вопрос в чате) — тот же ответ.
+bot.on("message:text", (ctx) => ctx.reply(REPLY_TEXT));
 
 const handleUpdate = webhookCallback(bot, "std/http");
 
@@ -65,13 +52,12 @@ Deno.serve(async (req) => {
   }
 
   // POST — апдейт от Telegram.
+  // Возвращаем 200 даже при ошибке reply (например, "chat not found" /
+  // "bot was blocked"), чтобы Telegram не ретраил один и тот же апдейт.
   try {
     return await handleUpdate(req);
   } catch (err) {
     console.error("webhook handler error:", err);
-    return new Response(
-      JSON.stringify({ error: String(err) }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response();
   }
 });
