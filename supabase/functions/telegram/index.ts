@@ -1,66 +1,66 @@
-// Telegram bot "Dan Games" — Supabase Edge Function (Deno)
+// Telegram bot "Dan Games" — Supabase Edge Function (Deno) на grammY.
 //
-// Commands handled: /start, /chat, and any message.
-// Reply to anything from the chat: "привет это чат-бот Dan Games".
+// Команды: /start, /chat, а также любой текст.
+// Ответ на всё: "привет это чат-бот Dan Games".
 //
-// Deploy this as an Edge Function named "telegram".
-// IMPORTANT: the function must be PUBLIC (JWT verification OFF), because
-// Telegram cannot send a Supabase JWT.
-//
-// One-time setup: open  https://<project-ref>.functions.supabase.co/telegram/register
-// in a browser (or invoke it once) to register the webhook with Telegram.
-// Supabase's servers can reach api.telegram.org even though your local PC cannot.
+// Деплой: supabase functions deploy telegram --no-verify-jwt --use-api --yes
+// (public-функция, т.к. Telegram не присылает Supabase JWT).
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { Bot, webhookCallback } from "https://deno.land/x/grammy@v1.30.0/mod.ts";
 
-const TELEGRAM_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") ?? "";
-const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_TOKEN}`;
+const TELEGRAM_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+if (!TELEGRAM_TOKEN) {
+  throw new Error("TELEGRAM_BOT_TOKEN secret is not set");
+}
+
+const bot = new Bot(TELEGRAM_TOKEN);
 
 const REPLY_TEXT = "привет это чат-бот Dan Games";
 
-async function handler(req: Request): Promise<Response> {
+bot.command("start", (ctx) => ctx.reply(REPLY_TEXT));
+bot.command("chat", (ctx) => ctx.reply(REPLY_TEXT));
+
+// Любое другое текстовое сообщение (вопрос в чате) — тот же ответ.
+// Команды не трогаем: они уже обработаны выше.
+bot.on("message:text", (ctx) => {
+  const text = ctx.message?.text ?? "";
+  if (text.startsWith("/")) return;
+  return ctx.reply(REPLY_TEXT);
+});
+
+const handleUpdate = webhookCallback(bot, "std/http");
+
+Deno.serve(async (req) => {
   const url = new URL(req.url);
 
-  // --- bootstrap: point Telegram's webhook at THIS function ---
-  if (url.pathname.endsWith("/register") || url.pathname.endsWith("/register/")) {
-    if (!TELEGRAM_TOKEN) {
-      return new Response(
-        JSON.stringify({ ok: false, description: "TELEGRAM_BOT_TOKEN secret is not set" }),
-        { headers: { "Content-Type": "application/json" } },
-      );
-    }
-    const webhookUrl = `${url.origin}/telegram`;
-    const res = await fetch(`${TELEGRAM_API}/setWebhook`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: webhookUrl, drop_pending_updates: true }),
-    });
-    const body = await res.text();
-    return new Response(body, {
-      status: res.status,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  // --- Telegram webhook (POST) ---
-  if (req.method === "POST") {
-    const update = await req.json().catch(() => null);
-    const chatId: number | undefined = update?.message?.chat?.id;
-
-    if (chatId) {
-      await fetch(`${TELEGRAM_API}/sendMessage`, {
-        method: "POST",
+  // Разовый bootstrap: привязать вебхук Telegram к этой функции.
+  if (url.pathname.endsWith("/register")) {
+    try {
+      const webhookUrl = `${url.origin}/telegram`;
+      const ok = await bot.api.setWebhook(webhookUrl, {
+        drop_pending_updates: true,
+      });
+      return new Response(JSON.stringify({ ok, webhookUrl }), {
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: chatId, text: REPLY_TEXT }),
-      }).catch(() => null);
+      });
+    } catch (err) {
+      return new Response(JSON.stringify({ ok: false, error: String(err) }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-
-    // Always 200 so Telegram does not retry.
-    return new Response("OK");
   }
 
-  // --- GET health check ---
-  return new Response("Dan Games Telegram bot is running");
-}
+  // GET — health check.
+  if (req.method !== "POST") {
+    return new Response("Dan Games Telegram bot is running (grammY)");
+  }
 
-serve(handler);
+  // POST — апдейт от Telegram.
+  try {
+    return await handleUpdate(req);
+  } catch (err) {
+    console.error("webhook handler error:", err);
+    return new Response("Internal Server Error", { status: 500 });
+  }
+});
