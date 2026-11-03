@@ -69,6 +69,9 @@ Deno.serve(async (req) => {
     return await handleUpdate(req);
   } catch (err) {
     console.error("webhook handler error:", err);
-    return new Response("Internal Server Error", { status: 500 });
+    return new Response(
+      JSON.stringify({ error: String(err) }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
   }
 });
