@@ -6,7 +6,7 @@
 // Деплой: supabase functions deploy telegram --no-verify-jwt --use-api --yes
 // (public-функция, т.к. Telegram не присылает Supabase JWT).
 
-import { Bot, webhookCallback } from "https://deno.land/x/grammy@v1.30.0/mod.ts";
+import { Bot, webhookCallback } from "npm:grammy@1.46.0";
 
 const TELEGRAM_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
 if (!TELEGRAM_TOKEN) {
