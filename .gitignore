@@ -1,0 +1,9 @@
+# Secrets — never commit
+.env
+.env.*
+supabase/.temp/
+supabase/.branches/
+*.local
+
+# Dependencies
+node_modules/
