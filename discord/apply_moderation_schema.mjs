@@ -1,0 +1,11 @@
+import "dotenv/config";
+import { readFileSync } from "node:fs";
+import pg from "pg";
+const client = new pg.Client({ connectionString: process.env.DATABASE_URL, ssl: false, connectionTimeoutMillis: 15000 });
+await client.connect();
+await client.query(readFileSync(new URL("../db/moderation.sql", import.meta.url), "utf8"));
+const ev = await client.query("select column_name, data_type from information_schema.columns where table_name='moderation_events' order by ordinal_position");
+const bans = await client.query("select column_name, data_type from information_schema.columns where table_name='moderation_bans' order by ordinal_position");
+console.log("moderation_events:", ev.rows.map(r => `${r.column_name}(${r.data_type})`).join(", "));
+console.log("moderation_bans:", bans.rows.map(r => `${r.column_name}(${r.data_type})`).join(", "));
+await client.end();

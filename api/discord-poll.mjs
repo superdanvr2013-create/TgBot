@@ -1,5 +1,6 @@
 import pg from "pg";
 import { retrieve } from "../discord/rag.mjs";
+import { moderateMessage } from "./moderation.mjs";
 
 const {
   DISCORD_TOKEN,
@@ -178,13 +179,43 @@ async function pollChannel(channelId) {
   const ordered = [...messages].reverse();
   let newest = lastId;
   let processed = 0;
-  const maxProcess = 3; // POST budget is limited; deep backlogs are handled over consecutive polls
+  let banned = 0;
+  const maxProcess = 10; // moderation first, then AI replies
 
   for (const message of ordered) {
     if (message.id === lastId) continue;
     newest = message.id;
     if (message.author?.bot || !message.content?.trim()) continue;
     const content = message.content.trim();
+
+    // ── Модерация: проверяется КАЖДОЕ сообщение (спам/оскорбления) ──────
+    try {
+      const mod = await moderateMessage({
+        discordId: message.author?.id,
+        username: message.author?.username,
+        channelId,
+        content,
+      });
+      if (mod.message) {
+        await sendMessage(channelId, mod.message);
+        banned++;
+      }
+      if (mod.banned) {
+        // Забаненный: сообщение обработано модерацией, AI не отвечает.
+        processed++;
+        await db.query(
+          `INSERT INTO discord_poll_state (channel_id, last_message_id, updated_at)
+           VALUES ($1, $2, now())
+           ON CONFLICT (channel_id) DO UPDATE SET last_message_id=EXCLUDED.last_message_id, updated_at=now()`,
+          [channelId, newest]
+        );
+        continue;
+      }
+    } catch (err) {
+      console.warn("Moderation skipped:", err.message);
+    }
+
+    // ── Обычная обработка: только сообщения, адресованные боту ──────────
     const mentioned = content.includes(`<@${process.env.DISCORD_CLIENT_ID || "__none__"}>`);
     if (!mentioned && !/bot|бот/i.test(content)) continue;
 
@@ -224,7 +255,7 @@ async function pollChannel(channelId) {
       [channelId, newest]
     );
   }
-  return { channelId, fetched: messages.length, processed };
+  return { channelId, fetched: messages.length, processed, banned };
 }
 
 export default async function handler(req, res) {
