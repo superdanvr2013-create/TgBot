@@ -2,10 +2,6 @@ name: Discord REST poller
 
 on:
   workflow_dispatch:
-  schedule:
-    # GitHub schedule has a minimum practical granularity of about 5 minutes
-    # and may start later under load.
-    - cron: "*/5 * * * *"
 
 concurrency:
   group: discord-rest-poller
