@@ -7,6 +7,9 @@ public partial class Form1 : Form
     private EmbeddingClient? _embed;
     private List<KnowledgeRow> _rows = new();
     private long? _editingId;
+    private WordsRepository? _wordsRepo;
+    private List<WordRow> _wordRows = new();
+    private long? _editingWordId;
 
     public Form1()
     {
@@ -30,6 +33,7 @@ public partial class Form1 : Form
 
         // Preload the theme list.
         RefreshGrid();
+        RefreshWordsGrid();
     }
 
     private void SetupServices()
@@ -38,6 +42,7 @@ public partial class Form1 : Form
         {
             _repo = new KnowledgeRepository(_config.ConnectionString);
             _embed = new EmbeddingClient(_config.EmbedUrl, _config.EmbedApiKey, _config.EmbedModel);
+            _wordsRepo = new WordsRepository(_config.ConnectionString);
             SetStatus("Подключение настроено.", StatusKind.Ok);
         }
         catch (Exception ex)
@@ -224,6 +229,7 @@ public partial class Form1 : Form
             UpdateConnectionStatus();
             SetupServices();
             RefreshGrid();
+            RefreshWordsGrid();
         }
     }
 
@@ -249,6 +255,162 @@ public partial class Form1 : Form
         {
             SetBusy(false);
         }
+    }
+
+    // ── Вкладка «Словарь оскорблений» ───────────────────────────────────────
+
+    private async void RefreshWordsGrid(string? filter = null)
+    {
+        if (_wordsRepo is null)
+        {
+            dgvWords.Rows.Clear();
+            return;
+        }
+        try
+        {
+            _wordRows = (await _wordsRepo.ListAsync(filter)).ToList();
+            dgvWords.Rows.Clear();
+            foreach (var row in _wordRows)
+            {
+                dgvWords.Rows.Add(row.Id, row.Word, row.Note, row.AddedAt.ToLocalTime().ToString("g"));
+            }
+            SetStatus($"Словарь: загружено слов: {_wordRows.Count}", StatusKind.Ok);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Не удалось загрузить словарь: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка загрузки словаря", ex);
+        }
+    }
+
+    private async void BtnAddWord_Click(object? sender, EventArgs e)
+    {
+        var word = txtWord.Text.Trim().ToLowerInvariant();
+        if (word.Length == 0)
+        {
+            SetStatus("Введите слово.", StatusKind.Warn);
+            txtWord.Focus();
+            return;
+        }
+        if (_wordsRepo is null)
+        {
+            SetStatus("Сначала настройте подключение к БД.", StatusKind.Warn);
+            return;
+        }
+        try
+        {
+            SetBusy(true, "Добавление слова…");
+            var id = await _wordsRepo.AddAsync(word, txtWordNote.Text.Trim());
+            SetStatus($"Слово «{word}» добавлено (id={id}).", StatusKind.Ok);
+            txtWord.Clear();
+            txtWordNote.Clear();
+            await Task.Run(() => RefreshWordsGrid(txtSearchWord.Text.Trim()));
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Ошибка добавления слова: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка добавления слова", ex);
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
+    private async void BtnUpdateWord_Click(object? sender, EventArgs e)
+    {
+        if (_editingWordId is null)
+        {
+            SetStatus("Выберите слово (двойной клик в таблице), затем нажмите «Обновить».", StatusKind.Warn);
+            return;
+        }
+        var word = txtWord.Text.Trim().ToLowerInvariant();
+        if (word.Length == 0)
+        {
+            SetStatus("Введите слово.", StatusKind.Warn);
+            txtWord.Focus();
+            return;
+        }
+        if (_wordsRepo is null)
+        {
+            SetStatus("Сначала настройте подключение к БД.", StatusKind.Warn);
+            return;
+        }
+        try
+        {
+            SetBusy(true, "Обновление слова…");
+            await _wordsRepo.UpdateAsync(_editingWordId.Value, word, txtWordNote.Text.Trim());
+            SetStatus($"Слово «{word}» обновлено.", StatusKind.Ok);
+            txtWord.Clear();
+            txtWordNote.Clear();
+            _editingWordId = null;
+            ResetWordButtonState();
+            await Task.Run(() => RefreshWordsGrid(txtSearchWord.Text.Trim()));
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Ошибка обновления слова: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка обновления слова", ex);
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
+    private async void BtnDeleteWord_Click(object? sender, EventArgs e)
+    {
+        if (dgvWords.SelectedRows.Count == 0)
+        {
+            SetStatus("Выберите слово для удаления.", StatusKind.Warn);
+            return;
+        }
+        var id = (long)dgvWords.SelectedRows[0].Cells[0].Value!;
+        var word = (string)dgvWords.SelectedRows[0].Cells[1].Value!;
+        if (MessageBox.Show($"Удалить слово «{word}»?", "Удаление", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            return;
+        if (_wordsRepo is null)
+        {
+            SetStatus("БД не настроена.", StatusKind.Warn);
+            return;
+        }
+        try
+        {
+            SetBusy(true, "Удаление слова…");
+            await _wordsRepo.DeleteAsync(id);
+            SetStatus($"Слово «{word}» удалено.", StatusKind.Ok);
+            await Task.Run(() => RefreshWordsGrid(txtSearchWord.Text.Trim()));
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Ошибка удаления слова: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка удаления слова", ex);
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
+    private async void BtnSearchWord_Click(object? sender, EventArgs e)
+    {
+        await Task.Run(() => RefreshWordsGrid(txtSearchWord.Text.Trim()));
+    }
+
+    private void DgvWords_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex < 0) return;
+        var r = _wordRows[e.RowIndex];
+        _editingWordId = r.Id;
+        txtWord.Text = r.Word;
+        txtWordNote.Text = r.Note;
+        ResetWordButtonState();
+        SetStatus($"Загружено слово «{r.Word}». Измените и нажмите «Обновить».", StatusKind.Ok);
+    }
+
+    private void ResetWordButtonState()
+    {
+        btnUpdateWord.Enabled = _editingWordId is not null;
     }
 
     private void ClearFields()

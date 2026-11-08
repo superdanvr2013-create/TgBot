@@ -37,8 +37,23 @@ function getPool() {
   return pool;
 }
 
+// Слова из БД (таблица moderation_words) с кэшем 60 сек — правки из C#-приложения
+// подхватываются автоматически не позже чем через минуту.
+let dbWordsCache = null;
+let dbWordsCacheTime = 0;
+const DB_WORDS_TTL_MS = 60000;
+
+async function loadDbWords() {
+  const now = Date.now();
+  if (dbWordsCache && now - dbWordsCacheTime < DB_WORDS_TTL_MS) return dbWordsCache;
+  const r = await getPool().query("SELECT word FROM moderation_words");
+  dbWordsCache = r.rows.map((row) => row.word.toLowerCase());
+  dbWordsCacheTime = now;
+  return dbWordsCache;
+}
+
 // ── Определение оскорблений и нецензурной лексики ─────────────────────────
-// Часть слов маскируется, чтобы не хранить их в открытом виде в репозитории.
+// Базовые regex (маскировки, разрядки) + слова из таблицы moderation_words.
 
 const ABUSE_PATTERNS = [
   /[хx]\s*[уy]\s*[йyёюe]/i,
@@ -69,14 +84,14 @@ const INSULT_WORDS = [
   "мразь", "мудак", "уёбок", "уебок", "чмо", "гнида", "падла",
 ];
 
-export function countAbuse(content) {
+export function countAbuse(content, dbWords = []) {
   const text = content.toLowerCase();
   let hits = 0;
   for (const re of ABUSE_PATTERNS) {
     const matches = text.match(new RegExp(re.source, "gi"));
     if (matches) hits += matches.length;
   }
-  for (const word of INSULT_WORDS) {
+  for (const word of [...INSULT_WORDS, ...dbWords]) {
     let idx = 0;
     while ((idx = text.indexOf(word, idx)) !== -1) {
       hits++;
@@ -161,8 +176,10 @@ export async function moderateMessage({ discordId, username, channelId, content,
     return enforceBan(discordId, username, channelId, state, "спам", "за спам");
   }
 
-  // 2. Оскорбления: считаем слова в сообщении
-  const abuseHits = countAbuse(content);
+  // 2. Оскорбления: считаем слова в сообщении (базовый словарь + слова из БД)
+  let dbWords = [];
+  try { dbWords = await loadDbWords(); } catch (err) { console.warn("Words load skipped:", err.message); }
+  const abuseHits = countAbuse(content, dbWords);
   if (abuseHits > 0) {
     // каждая фраза считается одним нарушением (упрощённо: 1 событие на сообщение)
     await recordEvent(discordId, channelId, "abuse");
