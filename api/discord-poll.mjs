@@ -217,7 +217,32 @@ async function pollChannel(channelId) {
 export default async function handler(req, res) {
   if (req.method !== "POST" && req.method !== "GET") return json(res, 405, { error: "Method not allowed" });
   if (!auth(req)) return json(res, 401, { error: "Unauthorized" });
-  if (req.method === "GET") return json(res, 200, { ok: true, service: "discord-rest-poller" });
+  if (req.method === "GET") {
+    // Diagnostic submodes: /api/discord-poll?probe=discord|groq|mistral|db
+    const probe = req.query?.probe;
+    if (!probe) return json(res, 200, { ok: true, service: "discord-rest-poller" });
+    const t0 = Date.now();
+    try {
+      if (probe === "discord") {
+        const r = await fetch("https://discord.com/api/v10/gateway", { signal: AbortSignal.timeout(10000) });
+        return json(res, 200, { probe, status: r.status, ms: Date.now() - t0, body: (await r.text()).slice(0, 200) });
+      }
+      if (probe === "groq") {
+        const r = await fetch("https://api.groq.com/openai/v1/models", {
+          headers: GROQ_API_KEY ? { Authorization: `Bearer ${GROQ_API_KEY}` } : {},
+          signal: AbortSignal.timeout(10000),
+        });
+        return json(res, 200, { probe, status: r.status, ms: Date.now() - t0, body: (await r.text()).slice(0, 200) });
+      }
+      if (probe === "db") {
+        const r = await getPool().query("SELECT count(*)::int AS c FROM roulette_participants");
+        return json(res, 200, { probe, ok: true, ms: Date.now() - t0, roulette: r.rows[0].c });
+      }
+      return json(res, 400, { error: "Unknown probe" });
+    } catch (err) {
+      return json(res, 500, { probe, error: String(err.message || err), ms: Date.now() - t0 });
+    }
+  }
 
   try {
     const channelIds = (DISCORD_CHANNEL_IDS || "").split(",").map((x) => x.trim()).filter(Boolean);
