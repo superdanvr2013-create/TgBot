@@ -27,7 +27,7 @@ TgBot/
 ```
 supabase login
 supabase link --project-ref mozbapnovlngcyishjxw
-supabase secrets set TELEGRAM_BOT_TOKEN=9155514489:...
+supabase secrets set TELEGRAM_BOT_TOKEN=<telegram_bot_token>
 supabase functions deploy telegram --no-verify-jwt
 ```
 

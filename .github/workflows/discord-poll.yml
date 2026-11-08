@@ -1,0 +1,39 @@
+name: Discord REST poller
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub Actions can delay scheduled starts; this worker polls Vercel every 15 seconds.
+    - cron: "0 * * * *"
+
+concurrency:
+  group: discord-rest-poller
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    name: Poll Discord through Vercel
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Poll every 15 seconds
+        env:
+          POLL_URL: ${{ secrets.VERCEL_POLL_URL }}
+          POLL_SECRET: ${{ secrets.DISCORD_POLL_SECRET }}
+        shell: bash
+        run: |
+          set -u
+          if [ -z "${POLL_URL:-}" ] || [ -z "${POLL_SECRET:-}" ]; then
+            echo "Missing VERCEL_POLL_URL or DISCORD_POLL_SECRET repository secret"
+            exit 1
+          fi
+          end=$((SECONDS + 3300))
+          while [ "$SECONDS" -lt "$end" ]; do
+            code=$(curl --silent --show-error --max-time 45 \
+              -o response.json -w "%{http_code}" \
+              -X POST "$POLL_URL" \
+              -H "Authorization: Bearer $POLL_SECRET" \
+              -H "Content-Type: application/json" || true)
+            echo "$(date -u +%FT%TZ) HTTP $code $(tr '\n' ' ' < response.json 2>/dev/null | cut -c1-500)"
+            sleep 15
+          done

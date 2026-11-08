@@ -1,0 +1,12 @@
+{
+  "name": "dan-games-discord-vercel-poller",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "ConnectionString": "",
+  "EmbedUrl": "https://api.mistral.ai/v1/embeddings",
+  "EmbedModel": "mistral-embed",
+  "EmbedApiKey": ""
+}
