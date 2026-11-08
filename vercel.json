@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "api/discord-poll.mjs": {
-      "maxDuration": 10
+      "maxDuration": 60
     }
   }
 }

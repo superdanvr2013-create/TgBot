@@ -178,6 +178,7 @@ async function pollChannel(channelId) {
   const ordered = [...messages].reverse();
   let newest = lastId;
   let processed = 0;
+  const maxProcess = 3; // POST budget is limited; deep backlogs are handled over consecutive polls
 
   for (const message of ordered) {
     if (message.id === lastId) continue;
@@ -200,6 +201,18 @@ async function pollChannel(channelId) {
     } catch (err) {
       console.error("Message processing error:", err.message);
       await sendMessage(channelId, "Извини, сейчас не могу ответить. Попробуй через минуту.").catch(() => {});
+    }
+
+    // Persist the cursor after each message so progress survives early termination.
+    await db.query(
+      `INSERT INTO discord_poll_state (channel_id, last_message_id, updated_at)
+       VALUES ($1, $2, now())
+       ON CONFLICT (channel_id) DO UPDATE SET last_message_id=EXCLUDED.last_message_id, updated_at=now()`,
+      [channelId, newest]
+    );
+    if (processed >= maxProcess) {
+      console.log(`Processed ${processed} messages; deferring the rest to the next poll.`);
+      break;
     }
   }
 
