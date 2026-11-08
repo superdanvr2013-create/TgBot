@@ -46,8 +46,12 @@ public sealed class KnowledgeRepository
                 Username = user,
                 Password = pass,
                 SslMode = SslMode.Require,
-                Timeout = 30,
+                Timeout = 60,           // connection open (bootstrap = load types) может быть медленным
                 CommandTimeout = 60,
+                CancellationTimeout = 30,
+                // Pooler: держим меньше соединений, но с запасом времени на открытие
+                MaxPoolSize = 4,
+                ConnectionIdleLifetime = 60,
             };
             if (!string.IsNullOrEmpty(db)) b.Database = db;
             return b.ConnectionString;
@@ -57,11 +61,32 @@ public sealed class KnowledgeRepository
 
     private NpgsqlConnection Open() => new(_connectionString);
 
+    /// <summary>Открывает соединение с повторами: транзитные обрывы сети к Supabase не редкость.</summary>
+    private async Task<NpgsqlConnection> OpenWithRetryAsync(int attempts = 3)
+    {
+        Exception? last = null;
+        for (var i = 1; i <= attempts; i++)
+        {
+            var conn = new NpgsqlConnection(_connectionString);
+            try
+            {
+                await conn.OpenAsync();
+                return conn;
+            }
+            catch (Exception ex)
+            {
+                last = ex;
+                conn.Dispose();
+                if (i < attempts) await Task.Delay(i * 2000);
+            }
+        }
+        throw last!;
+    }
+
     public async Task<long> UpsertAsync(string theme, string description, float[] embedding)
     {
         // Insert with embedding; on theme conflict, update description + embedding.
-        await using var conn = Open();
-        await conn.OpenAsync();
+        await using var conn = await OpenWithRetryAsync();
 
         const string sql = """
             INSERT INTO knowledge (theme, description, embedding)
@@ -84,8 +109,7 @@ public sealed class KnowledgeRepository
     public async Task<long> UpdateAsync(long id, string theme, string description, float[] embedding)
     {
         // Update an existing row by its id (theme can be changed too).
-        await using var conn = Open();
-        await conn.OpenAsync();
+        await using var conn = await OpenWithRetryAsync();
 
         const string sql = """
             UPDATE knowledge
@@ -108,8 +132,7 @@ public sealed class KnowledgeRepository
 
     public async Task<IReadOnlyList<KnowledgeRow>> ListAsync(int limit = 200)
     {
-        await using var conn = Open();
-        await conn.OpenAsync();
+        await using var conn = await OpenWithRetryAsync();
         const string sql = """
             SELECT id, theme, description, created_at, updated_at, embedding IS NOT NULL AS has_embedding
               FROM knowledge
@@ -137,8 +160,7 @@ public sealed class KnowledgeRepository
 
     public async Task DeleteAsync(long id)
     {
-        await using var conn = Open();
-        await conn.OpenAsync();
+        await using var conn = await OpenWithRetryAsync();
         const string sql = "DELETE FROM knowledge WHERE id = @id;";
         await using var cmd = new NpgsqlCommand(sql, conn);
         cmd.Parameters.AddWithValue("id", id);
@@ -149,8 +171,7 @@ public sealed class KnowledgeRepository
     {
         try
         {
-            await using var conn = Open();
-            await conn.OpenAsync();
+            await using var conn = await OpenWithRetryAsync();
             await using var cmd = new NpgsqlCommand("SELECT 1;", conn);
             await cmd.ExecuteScalarAsync();
             return true;
