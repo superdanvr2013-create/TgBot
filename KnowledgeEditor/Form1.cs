@@ -1,3 +1,5 @@
+using System.Net.Http.Json;
+
 namespace KnowledgeEditor;
 
 public partial class Form1 : Form
@@ -10,6 +12,12 @@ public partial class Form1 : Form
     private WordsRepository? _wordsRepo;
     private List<WordRow> _wordRows = new();
     private long? _editingWordId;
+    private ProvidersRepository? _providersRepo;
+    private List<ProviderRow> _providerRows = new();
+    private long? _editingProviderId;
+    private IndividualRepository? _individualRepo;
+    private List<IndividualRow> _individualRows = new();
+    private long? _editingIndividualId;
 
     public Form1()
     {
@@ -34,6 +42,8 @@ public partial class Form1 : Form
         // Preload the theme list.
         RefreshGrid();
         RefreshWordsGrid();
+        RefreshProvidersGrid();
+        RefreshIndividualGrid();
     }
 
     private void SetupServices()
@@ -43,6 +53,8 @@ public partial class Form1 : Form
             _repo = new KnowledgeRepository(_config);
             _embed = new EmbeddingClient(_config.EmbedUrl, _config.EmbedApiKey, _config.EmbedModel);
             _wordsRepo = new WordsRepository(_config);
+            _providersRepo = new ProvidersRepository(_config);
+            _individualRepo = new IndividualRepository(_config);
             SetStatus(_config.DbMode == "direct"
                 ? "Подключение настроено (прямое к БД)."
                 : "Подключение настроено (через Vercel API).", StatusKind.Ok);
@@ -232,6 +244,7 @@ public partial class Form1 : Form
             SetupServices();
             RefreshGrid();
             RefreshWordsGrid();
+            RefreshProvidersGrid();
         }
     }
 
@@ -413,6 +426,314 @@ public partial class Form1 : Form
     private void ResetWordButtonState()
     {
         btnUpdateWord.Enabled = _editingWordId is not null;
+    }
+
+    // ── Вкладка «ИИ-провайдеры» ──────────────────────────────────────────────
+
+    private async void RefreshProvidersGrid()
+    {
+        if (_providersRepo is null)
+        {
+            dgvProviders.Rows.Clear();
+            return;
+        }
+        try
+        {
+            _providerRows = (await _providersRepo.ListAsync()).ToList();
+            dgvProviders.Rows.Clear();
+            foreach (var p in _providerRows)
+            {
+                dgvProviders.Rows.Add(p.Id, p.Name, p.BaseUrl, p.Model, p.Active ? "⭐" : "", p.Description);
+            }
+            SetStatus($"Провайдеры: {_providerRows.Count} шт.", StatusKind.Ok);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Не удалось загрузить провайдеров: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка загрузки провайдеров", ex);
+        }
+    }
+
+    private ProviderRow? CollectProviderFromForm(bool requireId)
+    {
+        var name = txtProvName.Text.Trim();
+        var url = txtProvUrl.Text.Trim();
+        var key = txtProvKey.Text.Trim();
+        var model = txtProvModel.Text.Trim();
+        if (name.Length == 0) { SetStatus("Введите название.", StatusKind.Warn); txtProvName.Focus(); return null; }
+        if (url.Length == 0) { SetStatus("Введите Base URL.", StatusKind.Warn); txtProvUrl.Focus(); return null; }
+        if (key.Length == 0) { SetStatus("Введите API-ключ.", StatusKind.Warn); txtProvKey.Focus(); return null; }
+        if (model.Length == 0) { SetStatus("Введите модель.", StatusKind.Warn); txtProvModel.Focus(); return null; }
+        return new ProviderRow
+        {
+            Id = _editingProviderId ?? 0,
+            Name = name,
+            BaseUrl = url,
+            ApiKey = key,
+            Model = model,
+            Description = txtProvDesc.Text.Trim(),
+            Active = chkProvActive.Checked,
+        };
+    }
+
+    private async void BtnProvAdd_Click(object? sender, EventArgs e)
+    {
+        if (_providersRepo is null) { SetStatus("Сначала настройте подключение.", StatusKind.Warn); return; }
+        var p = CollectProviderFromForm(false);
+        if (p is null) return;
+        try
+        {
+            SetBusy(true, "Добавление провайдера…");
+            var id = await _providersRepo.AddAsync(p);
+            SetStatus($"Провайдер «{p.Name}» добавлен (id={id}).", StatusKind.Ok);
+            ClearProvForm();
+            await Task.Run(RefreshProvidersGrid);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Ошибка добавления: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка добавления провайдера", ex);
+        }
+        finally { SetBusy(false); }
+    }
+
+    private async void BtnProvUpdate_Click(object? sender, EventArgs e)
+    {
+        if (_editingProviderId is null) { SetStatus("Выберите провайдер (двойной клик), затем «Обновить».", StatusKind.Warn); return; }
+        if (_providersRepo is null) { SetStatus("Сначала настройте подключение.", StatusKind.Warn); return; }
+        var p = CollectProviderFromForm(true);
+        if (p is null) return;
+        try
+        {
+            SetBusy(true, "Обновление провайдера…");
+            await _providersRepo.UpdateAsync(p);
+            SetStatus($"Провайдер «{p.Name}» обновлён.", StatusKind.Ok);
+            ClearProvForm();
+            await Task.Run(RefreshProvidersGrid);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Ошибка обновления: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка обновления провайдера", ex);
+        }
+        finally { SetBusy(false); }
+    }
+
+    private async void BtnProvDelete_Click(object? sender, EventArgs e)
+    {
+        if (dgvProviders.SelectedRows.Count == 0) { SetStatus("Выберите провайдер для удаления.", StatusKind.Warn); return; }
+        if (_providersRepo is null) { SetStatus("БД не настроена.", StatusKind.Warn); return; }
+        var id = (long)dgvProviders.SelectedRows[0].Cells[0].Value!;
+        var name = (string)dgvProviders.SelectedRows[0].Cells[1].Value!;
+        if (MessageBox.Show($"Удалить провайдер «{name}»?", "Удаление", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+        try
+        {
+            SetBusy(true, "Удаление…");
+            await _providersRepo.DeleteAsync(id);
+            SetStatus($"Провайдер «{name}» удалён.", StatusKind.Ok);
+            ClearProvForm();
+            await Task.Run(RefreshProvidersGrid);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Ошибка удаления: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка удаления провайдера", ex);
+        }
+        finally { SetBusy(false); }
+    }
+
+    private async void BtnProvActivate_Click(object? sender, EventArgs e)
+    {
+        if (dgvProviders.SelectedRows.Count == 0) { SetStatus("Выберите провайдер для приоритета.", StatusKind.Warn); return; }
+        if (_providersRepo is null) { SetStatus("БД не настроена.", StatusKind.Warn); return; }
+        var id = (long)dgvProviders.SelectedRows[0].Cells[0].Value!;
+        var name = (string)dgvProviders.SelectedRows[0].Cells[1].Value!;
+        try
+        {
+            SetBusy(true, "Установка приоритета…");
+            await _providersRepo.ActivateAsync(id);
+            SetStatus($"«{name}» — теперь приоритетный. Боты переключатся в течение минуты.", StatusKind.Ok);
+            await Task.Run(RefreshProvidersGrid);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Ошибка: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка установки приоритета", ex);
+        }
+        finally { SetBusy(false); }
+    }
+
+    private async void BtnProvTest_Click(object? sender, EventArgs e)
+    {
+        var p = CollectProviderFromForm(false);
+        if (p is null) return;
+        try
+        {
+            SetBusy(true, $"Тест API «{p.Name}»…");
+            using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(45) };
+            var body = new
+            {
+                model = p.Model,
+                messages = new[] { new { role = "user", content = "привет, ответь одним словом" } },
+                max_tokens = 20,
+            };
+            using var resp = await http.PostAsJsonAsync($"{p.BaseUrl.TrimEnd('/')}/chat/completions", body);
+            var text = await resp.Content.ReadAsStringAsync();
+            if (resp.IsSuccessStatusCode)
+            {
+                var doc = System.Text.Json.JsonDocument.Parse(text);
+                var answer = doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+                SetStatus($"✅ API работает! Ответ: «{answer}»", StatusKind.Ok);
+            }
+            else
+            {
+                SetStatus($"❌ HTTP {(int)resp.StatusCode}: {text.Substring(0, Math.Min(200, text.Length))}", StatusKind.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Тест не прошёл: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка теста API", ex);
+        }
+        finally { SetBusy(false); }
+    }
+
+    private void DgvProviders_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex < 0) return;
+        var p = _providerRows[e.RowIndex];
+        _editingProviderId = p.Id;
+        txtProvName.Text = p.Name;
+        txtProvUrl.Text = p.BaseUrl;
+        txtProvKey.Text = p.ApiKey;
+        txtProvModel.Text = p.Model;
+        txtProvDesc.Text = p.Description;
+        chkProvActive.Checked = p.Active;
+        SetStatus($"Загружен «{p.Name}». Измените поля и нажмите «Обновить».", StatusKind.Ok);
+    }
+
+    private void ClearProvForm()
+    {
+        txtProvName.Clear();
+        txtProvUrl.Clear();
+        txtProvKey.Clear();
+        txtProvModel.Clear();
+        txtProvDesc.Clear();
+        chkProvActive.Checked = false;
+        _editingProviderId = null;
+    }
+
+    // ── Вкладка «Обращения» ─────────────────────────────────────────────────
+
+    private async void RefreshIndividualGrid()
+    {
+        if (_individualRepo is null)
+        {
+            dgvIndividual.Rows.Clear();
+            return;
+        }
+        try
+        {
+            _individualRows = (await _individualRepo.ListAsync()).ToList();
+            dgvIndividual.Rows.Clear();
+            foreach (var r in _individualRows)
+            {
+                dgvIndividual.Rows.Add(r.Id, r.Nickname, r.Description, r.UpdatedAt.ToLocalTime().ToString("g"));
+            }
+            SetStatus($"Обращения: {_individualRows.Count} записей.", StatusKind.Ok);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Не удалось загрузить обращения: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка загрузки обращений", ex);
+        }
+    }
+
+    private async void BtnIndAdd_Click(object? sender, EventArgs e)
+    {
+        var nick = txtIndNick.Text.Trim();
+        var desc = txtIndDesc.Text.Trim();
+        if (nick.Length == 0) { SetStatus("Введите ник.", StatusKind.Warn); txtIndNick.Focus(); return; }
+        if (desc.Length == 0) { SetStatus("Введите варианты обращений (через ;).", StatusKind.Warn); txtIndDesc.Focus(); return; }
+        if (_individualRepo is null) { SetStatus("Сначала настройте подключение.", StatusKind.Warn); return; }
+        try
+        {
+            SetBusy(true, "Добавление обращения…");
+            var id = await _individualRepo.AddAsync(nick, desc);
+            SetStatus($"Обращения для «{nick}» сохранены (id={id}).", StatusKind.Ok);
+            ClearIndForm();
+            await Task.Run(RefreshIndividualGrid);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Ошибка добавления: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка добавления обращения", ex);
+        }
+        finally { SetBusy(false); }
+    }
+
+    private async void BtnIndUpdate_Click(object? sender, EventArgs e)
+    {
+        if (_editingIndividualId is null) { SetStatus("Выберите запись (двойной клик), затем «Обновить».", StatusKind.Warn); return; }
+        var nick = txtIndNick.Text.Trim();
+        var desc = txtIndDesc.Text.Trim();
+        if (nick.Length == 0) { SetStatus("Введите ник.", StatusKind.Warn); txtIndNick.Focus(); return; }
+        if (desc.Length == 0) { SetStatus("Введите варианты обращений (через ;).", StatusKind.Warn); txtIndDesc.Focus(); return; }
+        if (_individualRepo is null) { SetStatus("Сначала настройте подключение.", StatusKind.Warn); return; }
+        try
+        {
+            SetBusy(true, "Обновление обращения…");
+            await _individualRepo.UpdateAsync(_editingIndividualId.Value, nick, desc);
+            SetStatus($"Обращения для «{nick}» обновлены.", StatusKind.Ok);
+            ClearIndForm();
+            await Task.Run(RefreshIndividualGrid);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Ошибка обновления: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка обновления обращения", ex);
+        }
+        finally { SetBusy(false); }
+    }
+
+    private async void BtnIndDelete_Click(object? sender, EventArgs e)
+    {
+        if (dgvIndividual.SelectedRows.Count == 0) { SetStatus("Выберите запись для удаления.", StatusKind.Warn); return; }
+        if (_individualRepo is null) { SetStatus("БД не настроена.", StatusKind.Warn); return; }
+        var id = (long)dgvIndividual.SelectedRows[0].Cells[0].Value!;
+        var nick = (string)dgvIndividual.SelectedRows[0].Cells[1].Value!;
+        if (MessageBox.Show($"Удалить обращения для «{nick}»?", "Удаление", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+        try
+        {
+            SetBusy(true, "Удаление…");
+            await _individualRepo.DeleteAsync(id);
+            SetStatus($"Обращения «{nick}» удалены.", StatusKind.Ok);
+            ClearIndForm();
+            await Task.Run(RefreshIndividualGrid);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Ошибка удаления: " + ex.Message, StatusKind.Error);
+            ShowError("Ошибка удаления обращения", ex);
+        }
+        finally { SetBusy(false); }
+    }
+
+    private void DgvIndividual_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex < 0) return;
+        var r = _individualRows[e.RowIndex];
+        _editingIndividualId = r.Id;
+        txtIndNick.Text = r.Nickname;
+        txtIndDesc.Text = r.Description;
+        SetStatus($"Загружены обращения «{r.Nickname}». Измените и нажмите «Обновить».", StatusKind.Ok);
+    }
+
+    private void ClearIndForm()
+    {
+        txtIndNick.Clear();
+        txtIndDesc.Clear();
+        _editingIndividualId = null;
     }
 
     private void ClearFields()

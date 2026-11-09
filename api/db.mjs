@@ -71,6 +71,23 @@ export default async function handler(req, res) {
         );
         return json(res, 200, { ok: true, rows: rows.rows });
       }
+      if (table === "providers") {
+        const rows = await withRetry(() =>
+          getPool().query(
+            `SELECT id, name, base_url, api_key, model, description, active, sort_order, updated_at
+               FROM ai_providers ORDER BY active DESC, sort_order ASC, id ASC`
+          )
+        );
+        return json(res, 200, { ok: true, rows: rows.rows });
+      }
+      if (table === "individual") {
+        const rows = await withRetry(() =>
+          getPool().query(
+            "SELECT id, nickname, description, updated_at FROM individual ORDER BY nickname"
+          )
+        );
+        return json(res, 200, { ok: true, rows: rows.rows });
+      }
       if (table === "words") {
         const params = [];
         let where = "";
@@ -175,6 +192,95 @@ export default async function handler(req, res) {
         if (op === "delete") {
           if (!Number.isInteger(body.id)) return json(res, 400, { error: "id обязателен" });
           await withRetry(() => getPool().query("DELETE FROM moderation_words WHERE id=$1", [body.id]));
+          return json(res, 200, { ok: true });
+        }
+      }
+
+      // ── ai_providers ───────────────────────────────────────────
+      if (table === "providers") {
+        if (op === "add") {
+          const err = bad(body.name, "name") || bad(body.base_url, "base_url") || bad(body.api_key, "api_key") || bad(body.model, "model");
+          if (err) return json(res, 400, { error: err });
+          const active = body.active === true;
+          if (active) {
+            // снять галочку со всех, активна только одна
+            await withRetry(() => getPool().query("UPDATE ai_providers SET active=false"));
+          }
+          const r = await withRetry(() =>
+            getPool().query(
+              `INSERT INTO ai_providers (name, base_url, api_key, model, description, active, sort_order)
+               VALUES ($1,$2,$3,$4,$5,$6,$7)
+               ON CONFLICT DO NOTHING
+               RETURNING id`,
+              [body.name, body.base_url, body.api_key, body.model, body.description ?? null, active, Number.isInteger(body.sort_order) ? body.sort_order : 100]
+            )
+          );
+          return json(res, 200, { ok: true, id: r.rows[0].id });
+        }
+        if (op === "update") {
+          const err = bad(body.name, "name") || bad(body.base_url, "base_url") || bad(body.api_key, "api_key") || bad(body.model, "model");
+          if (err || !Number.isInteger(body.id)) return json(res, 400, { error: err || "id обязателен" });
+          const active = body.active === true;
+          if (active) {
+            await withRetry(() => getPool().query("UPDATE ai_providers SET active=false WHERE id<>$1", [body.id]));
+          }
+          const r = await withRetry(() =>
+            getPool().query(
+              `UPDATE ai_providers
+                  SET name=$1, base_url=$2, api_key=$3, model=$4, description=$5, active=$6, sort_order=$7, updated_at=now()
+                WHERE id=$8 RETURNING id`,
+              [body.name, body.base_url, body.api_key, body.model, body.description ?? null, active, Number.isInteger(body.sort_order) ? body.sort_order : 100, body.id]
+            )
+          );
+          if (!r.rows.length) return json(res, 404, { ok: false, error: `Провайдер id=${body.id} не найден` });
+          return json(res, 200, { ok: true, id: r.rows[0].id });
+        }
+        if (op === "activate") {
+          // поставить галочку приоритета на одну строку
+          if (!Number.isInteger(body.id)) return json(res, 400, { error: "id обязателен" });
+          await withRetry(() => getPool().query("UPDATE ai_providers SET active=false"));
+          await withRetry(() => getPool().query("UPDATE ai_providers SET active=true, updated_at=now() WHERE id=$1", [body.id]));
+          return json(res, 200, { ok: true });
+        }
+        if (op === "delete") {
+          if (!Number.isInteger(body.id)) return json(res, 400, { error: "id обязателен" });
+          await withRetry(() => getPool().query("DELETE FROM ai_providers WHERE id=$1", [body.id]));
+          return json(res, 200, { ok: true });
+        }
+      }
+
+      // ── individual (персональные обращения) ────────────────────
+      if (table === "individual") {
+        if (op === "add") {
+          const err = bad(body.nickname, "nickname") || bad(body.description, "description");
+          if (err) return json(res, 400, { error: err });
+          const r = await withRetry(() =>
+            getPool().query(
+              `INSERT INTO individual (nickname, description)
+               VALUES ($1, $2)
+               ON CONFLICT (nickname) DO UPDATE SET description = EXCLUDED.description, updated_at = now()
+               RETURNING id`,
+              [body.nickname, body.description]
+            )
+          );
+          return json(res, 200, { ok: true, id: r.rows[0].id });
+        }
+        if (op === "update") {
+          const err = bad(body.nickname, "nickname") || bad(body.description, "description");
+          if (err || !Number.isInteger(body.id)) return json(res, 400, { error: err || "id обязателен" });
+          const r = await withRetry(() =>
+            getPool().query(
+              `UPDATE individual SET nickname=$1, description=$2, updated_at=now()
+               WHERE id=$3 RETURNING id`,
+              [body.nickname, body.description, body.id]
+            )
+          );
+          if (!r.rows.length) return json(res, 404, { ok: false, error: `Запись id=${body.id} не найдена` });
+          return json(res, 200, { ok: true, id: r.rows[0].id });
+        }
+        if (op === "delete") {
+          if (!Number.isInteger(body.id)) return json(res, 400, { error: "id обязателен" });
+          await withRetry(() => getPool().query("DELETE FROM individual WHERE id=$1", [body.id]));
           return json(res, 200, { ok: true });
         }
       }

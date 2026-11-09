@@ -38,10 +38,49 @@ partial class Form1
         this.colDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
         this.colEmbed = new System.Windows.Forms.DataGridViewTextBoxColumn();
         this.colUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-        // ── TabControl: вкладки «Знания» и «Словарь оскорблений» ──
+        // ── TabControl: вкладки «Знания», «Словарь», «ИИ-провайдеры», «Обращения» ──
         this.tabControl = new System.Windows.Forms.TabControl();
         this.tabKnowledge = new System.Windows.Forms.TabPage();
         this.tabWords = new System.Windows.Forms.TabPage();
+        this.tabProviders = new System.Windows.Forms.TabPage();
+        this.tabIndividual = new System.Windows.Forms.TabPage();
+        // ── Контролы вкладки «Обращения» ──
+        this.lblIndNick = new System.Windows.Forms.Label();
+        this.txtIndNick = new System.Windows.Forms.TextBox();
+        this.lblIndDesc = new System.Windows.Forms.Label();
+        this.txtIndDesc = new System.Windows.Forms.TextBox();
+        this.btnIndAdd = new System.Windows.Forms.Button();
+        this.btnIndUpdate = new System.Windows.Forms.Button();
+        this.btnIndDelete = new System.Windows.Forms.Button();
+        this.dgvIndividual = new System.Windows.Forms.DataGridView();
+        this.colIndId = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.colIndNick = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.colIndDesc = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.colIndUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        // ── Контролы вкладки «ИИ-провайдеры» ──
+        this.lblProvName = new System.Windows.Forms.Label();
+        this.txtProvName = new System.Windows.Forms.TextBox();
+        this.lblProvUrl = new System.Windows.Forms.Label();
+        this.txtProvUrl = new System.Windows.Forms.TextBox();
+        this.lblProvKey = new System.Windows.Forms.Label();
+        this.txtProvKey = new System.Windows.Forms.TextBox();
+        this.lblProvModel = new System.Windows.Forms.Label();
+        this.txtProvModel = new System.Windows.Forms.TextBox();
+        this.lblProvDesc = new System.Windows.Forms.Label();
+        this.txtProvDesc = new System.Windows.Forms.TextBox();
+        this.chkProvActive = new System.Windows.Forms.CheckBox();
+        this.btnProvAdd = new System.Windows.Forms.Button();
+        this.btnProvUpdate = new System.Windows.Forms.Button();
+        this.btnProvDelete = new System.Windows.Forms.Button();
+        this.btnProvActivate = new System.Windows.Forms.Button();
+        this.btnProvTest = new System.Windows.Forms.Button();
+        this.dgvProviders = new System.Windows.Forms.DataGridView();
+        this.colProvId = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.colProvName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.colProvUrl = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.colProvModel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.colProvActive = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.colProvDesc = new System.Windows.Forms.DataGridViewTextBoxColumn();
         // ── Контролы вкладки «Словарь оскорблений» ──
         this.lblWord = new System.Windows.Forms.Label();
         this.txtWord = new System.Windows.Forms.TextBox();
@@ -59,9 +98,13 @@ partial class Form1
         this.colWordAdded = new System.Windows.Forms.DataGridViewTextBoxColumn();
         ((System.ComponentModel.ISupportInitialize)(this.dgvKnowledge)).BeginInit();
         ((System.ComponentModel.ISupportInitialize)(this.dgvWords)).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)(this.dgvProviders)).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)(this.dgvIndividual)).BeginInit();
         this.tabControl.SuspendLayout();
         this.tabKnowledge.SuspendLayout();
         this.tabWords.SuspendLayout();
+        this.tabProviders.SuspendLayout();
+        this.tabIndividual.SuspendLayout();
         this.SuspendLayout();
         // 
         // lblTitle
@@ -266,6 +309,8 @@ partial class Form1
         | System.Windows.Forms.AnchorStyles.Right)));
         this.tabControl.Controls.Add(this.tabKnowledge);
         this.tabControl.Controls.Add(this.tabWords);
+        this.tabControl.Controls.Add(this.tabProviders);
+        this.tabControl.Controls.Add(this.tabIndividual);
         this.tabControl.Location = new System.Drawing.Point(16, 55);
         this.tabControl.Name = "tabControl";
         this.tabControl.SelectedIndex = 0;
@@ -311,6 +356,410 @@ partial class Form1
         this.tabWords.TabIndex = 1;
         this.tabWords.Text = "🤬 Словарь оскорблений";
         this.tabWords.UseVisualStyleBackColor = true;
+        //
+        // tabProviders — ИИ-провайдеры
+        //
+        this.tabProviders.Controls.Add(this.dgvProviders);
+        this.tabProviders.Controls.Add(this.btnProvTest);
+        this.tabProviders.Controls.Add(this.btnProvActivate);
+        this.tabProviders.Controls.Add(this.btnProvDelete);
+        this.tabProviders.Controls.Add(this.btnProvUpdate);
+        this.tabProviders.Controls.Add(this.btnProvAdd);
+        this.tabProviders.Controls.Add(this.chkProvActive);
+        this.tabProviders.Controls.Add(this.txtProvDesc);
+        this.tabProviders.Controls.Add(this.lblProvDesc);
+        this.tabProviders.Controls.Add(this.txtProvModel);
+        this.tabProviders.Controls.Add(this.lblProvModel);
+        this.tabProviders.Controls.Add(this.txtProvKey);
+        this.tabProviders.Controls.Add(this.lblProvKey);
+        this.tabProviders.Controls.Add(this.txtProvUrl);
+        this.tabProviders.Controls.Add(this.lblProvUrl);
+        this.tabProviders.Controls.Add(this.txtProvName);
+        this.tabProviders.Controls.Add(this.lblProvName);
+        this.tabProviders.Location = new System.Drawing.Point(4, 29);
+        this.tabProviders.Name = "tabProviders";
+        this.tabProviders.Padding = new System.Windows.Forms.Padding(3);
+        this.tabProviders.Size = new System.Drawing.Size(746, 454);
+        this.tabProviders.TabIndex = 2;
+        this.tabProviders.Text = "🤖 ИИ-провайдеры";
+        this.tabProviders.UseVisualStyleBackColor = true;
+        //
+        // lblProvName
+        //
+        this.lblProvName.AutoSize = true;
+        this.lblProvName.Location = new System.Drawing.Point(13, 16);
+        this.lblProvName.Name = "lblProvName";
+        this.lblProvName.Size = new System.Drawing.Size(85, 20);
+        this.lblProvName.TabIndex = 0;
+        this.lblProvName.Text = "Название";
+        //
+        // txtProvName
+        //
+        this.txtProvName.Location = new System.Drawing.Point(110, 13);
+        this.txtProvName.Name = "txtProvName";
+        this.txtProvName.Size = new System.Drawing.Size(190, 27);
+        this.txtProvName.TabIndex = 1;
+        //
+        // lblProvUrl
+        //
+        this.lblProvUrl.AutoSize = true;
+        this.lblProvUrl.Location = new System.Drawing.Point(310, 16);
+        this.lblProvUrl.Name = "lblProvUrl";
+        this.lblProvUrl.Size = new System.Drawing.Size(72, 20);
+        this.lblProvUrl.TabIndex = 2;
+        this.lblProvUrl.Text = "Base URL";
+        //
+        // txtProvUrl
+        //
+        this.txtProvUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+        | System.Windows.Forms.AnchorStyles.Right)));
+        this.txtProvUrl.Location = new System.Drawing.Point(400, 13);
+        this.txtProvUrl.Name = "txtProvUrl";
+        this.txtProvUrl.Size = new System.Drawing.Size(330, 27);
+        this.txtProvUrl.TabIndex = 3;
+        //
+        // lblProvKey
+        //
+        this.lblProvKey.AutoSize = true;
+        this.lblProvKey.Location = new System.Drawing.Point(13, 50);
+        this.lblProvKey.Name = "lblProvKey";
+        this.lblProvKey.Size = new System.Drawing.Size(68, 20);
+        this.lblProvKey.TabIndex = 4;
+        this.lblProvKey.Text = "API-ключ";
+        //
+        // txtProvKey
+        //
+        this.txtProvKey.Location = new System.Drawing.Point(110, 47);
+        this.txtProvKey.Name = "txtProvKey";
+        this.txtProvKey.Size = new System.Drawing.Size(300, 27);
+        this.txtProvKey.TabIndex = 5;
+        //
+        // lblProvModel
+        //
+        this.lblProvModel.AutoSize = true;
+        this.lblProvModel.Location = new System.Drawing.Point(420, 50);
+        this.lblProvModel.Name = "lblProvModel";
+        this.lblProvModel.Size = new System.Drawing.Size(59, 20);
+        this.lblProvModel.TabIndex = 6;
+        this.lblProvModel.Text = "Модель";
+        //
+        // txtProvModel
+        //
+        this.txtProvModel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+        | System.Windows.Forms.AnchorStyles.Right)));
+        this.txtProvModel.Location = new System.Drawing.Point(490, 47);
+        this.txtProvModel.Name = "txtProvModel";
+        this.txtProvModel.Size = new System.Drawing.Size(240, 27);
+        this.txtProvModel.TabIndex = 7;
+        //
+        // lblProvDesc
+        //
+        this.lblProvDesc.AutoSize = true;
+        this.lblProvDesc.Location = new System.Drawing.Point(13, 84);
+        this.lblProvDesc.Name = "lblProvDesc";
+        this.lblProvDesc.Size = new System.Drawing.Size(85, 20);
+        this.lblProvDesc.TabIndex = 8;
+        this.lblProvDesc.Text = "Описание";
+        //
+        // txtProvDesc
+        //
+        this.txtProvDesc.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+        | System.Windows.Forms.AnchorStyles.Right)));
+        this.txtProvDesc.Location = new System.Drawing.Point(110, 81);
+        this.txtProvDesc.Name = "txtProvDesc";
+        this.txtProvDesc.Size = new System.Drawing.Size(620, 27);
+        this.txtProvDesc.TabIndex = 9;
+        //
+        // chkProvActive
+        //
+        this.chkProvActive.AutoSize = true;
+        this.chkProvActive.Location = new System.Drawing.Point(13, 118);
+        this.chkProvActive.Name = "chkProvActive";
+        this.chkProvActive.Size = new System.Drawing.Size(300, 24);
+        this.chkProvActive.TabIndex = 10;
+        this.chkProvActive.Text = "Приоритетный (галочка использования)";
+        this.chkProvActive.UseVisualStyleBackColor = true;
+        //
+        // btnProvAdd
+        //
+        this.btnProvAdd.BackColor = System.Drawing.Color.FromArgb(88, 101, 242);
+        this.btnProvAdd.ForeColor = System.Drawing.Color.White;
+        this.btnProvAdd.Location = new System.Drawing.Point(330, 112);
+        this.btnProvAdd.Name = "btnProvAdd";
+        this.btnProvAdd.Size = new System.Drawing.Size(120, 34);
+        this.btnProvAdd.TabIndex = 11;
+        this.btnProvAdd.Text = "➕ Добавить";
+        this.btnProvAdd.UseVisualStyleBackColor = false;
+        this.btnProvAdd.Click += new System.EventHandler(this.BtnProvAdd_Click);
+        //
+        // btnProvUpdate
+        //
+        this.btnProvUpdate.BackColor = System.Drawing.Color.FromArgb(38, 166, 91);
+        this.btnProvUpdate.ForeColor = System.Drawing.Color.White;
+        this.btnProvUpdate.Location = new System.Drawing.Point(460, 112);
+        this.btnProvUpdate.Name = "btnProvUpdate";
+        this.btnProvUpdate.Size = new System.Drawing.Size(120, 34);
+        this.btnProvUpdate.TabIndex = 12;
+        this.btnProvUpdate.Text = "✏️ Обновить";
+        this.btnProvUpdate.UseVisualStyleBackColor = false;
+        this.btnProvUpdate.Click += new System.EventHandler(this.BtnProvUpdate_Click);
+        //
+        // btnProvDelete
+        //
+        this.btnProvDelete.Location = new System.Drawing.Point(590, 112);
+        this.btnProvDelete.Name = "btnProvDelete";
+        this.btnProvDelete.Size = new System.Drawing.Size(120, 34);
+        this.btnProvDelete.TabIndex = 13;
+        this.btnProvDelete.Text = "🗑 Удалить";
+        this.btnProvDelete.UseVisualStyleBackColor = true;
+        this.btnProvDelete.Click += new System.EventHandler(this.BtnProvDelete_Click);
+        //
+        // btnProvActivate
+        //
+        this.btnProvActivate.BackColor = System.Drawing.Color.FromArgb(253, 185, 19);
+        this.btnProvActivate.Location = new System.Drawing.Point(590, 152);
+        this.btnProvActivate.Name = "btnProvActivate";
+        this.btnProvActivate.Size = new System.Drawing.Size(120, 34);
+        this.btnProvActivate.TabIndex = 14;
+        this.btnProvActivate.Text = "⭐ Приоритет";
+        this.btnProvActivate.UseVisualStyleBackColor = false;
+        this.btnProvActivate.Click += new System.EventHandler(this.BtnProvActivate_Click);
+        //
+        // btnProvTest
+        //
+        this.btnProvTest.Location = new System.Drawing.Point(460, 152);
+        this.btnProvTest.Name = "btnProvTest";
+        this.btnProvTest.Size = new System.Drawing.Size(120, 34);
+        this.btnProvTest.TabIndex = 15;
+        this.btnProvTest.Text = "🔌 Тест API";
+        this.btnProvTest.UseVisualStyleBackColor = true;
+        this.btnProvTest.Click += new System.EventHandler(this.BtnProvTest_Click);
+        //
+        // dgvProviders
+        //
+        this.dgvProviders.AllowUserToAddRows = false;
+        this.dgvProviders.AllowUserToDeleteRows = false;
+        this.dgvProviders.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+        | System.Windows.Forms.AnchorStyles.Left)
+        | System.Windows.Forms.AnchorStyles.Right)));
+        this.dgvProviders.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+        this.dgvProviders.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        this.dgvProviders.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colProvId,
+            this.colProvName,
+            this.colProvUrl,
+            this.colProvModel,
+            this.colProvActive,
+            this.colProvDesc});
+        dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+        dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+        dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+        dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+        dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+        dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+        dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+        this.dgvProviders.DefaultCellStyle = dataGridViewCellStyle2;
+        this.dgvProviders.Location = new System.Drawing.Point(13, 194);
+        this.dgvProviders.MultiSelect = false;
+        this.dgvProviders.Name = "dgvProviders";
+        this.dgvProviders.ReadOnly = true;
+        this.dgvProviders.RowHeadersVisible = false;
+        this.dgvProviders.RowTemplate.Height = 29;
+        this.dgvProviders.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+        this.dgvProviders.Size = new System.Drawing.Size(717, 254);
+        this.dgvProviders.TabIndex = 16;
+        this.dgvProviders.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvProviders_CellDoubleClick);
+        //
+        // colProvId
+        //
+        this.colProvId.FillWeight = 25F;
+        this.colProvId.HeaderText = "ID";
+        this.colProvId.MinimumWidth = 40;
+        this.colProvId.Name = "colProvId";
+        //
+        // colProvName
+        //
+        this.colProvName.FillWeight = 60F;
+        this.colProvName.HeaderText = "Название";
+        this.colProvName.MinimumWidth = 70;
+        this.colProvName.Name = "colProvName";
+        //
+        // colProvUrl
+        //
+        this.colProvUrl.FillWeight = 90F;
+        this.colProvUrl.HeaderText = "Base URL";
+        this.colProvUrl.MinimumWidth = 80;
+        this.colProvUrl.Name = "colProvUrl";
+        //
+        // colProvModel
+        //
+        this.colProvModel.FillWeight = 70F;
+        this.colProvModel.HeaderText = "Модель";
+        this.colProvModel.MinimumWidth = 60;
+        this.colProvModel.Name = "colProvModel";
+        //
+        // colProvActive
+        //
+        this.colProvActive.FillWeight = 30F;
+        this.colProvActive.HeaderText = "⭐";
+        this.colProvActive.MinimumWidth = 30;
+        this.colProvActive.Name = "colProvActive";
+        //
+        // colProvDesc
+        //
+        this.colProvDesc.FillWeight = 90F;
+        this.colProvDesc.HeaderText = "Описание";
+        this.colProvDesc.MinimumWidth = 70;
+        this.colProvDesc.Name = "colProvDesc";
+        //
+        // tabIndividual — персональные обращения
+        //
+        this.tabIndividual.Controls.Add(this.dgvIndividual);
+        this.tabIndividual.Controls.Add(this.btnIndDelete);
+        this.tabIndividual.Controls.Add(this.btnIndUpdate);
+        this.tabIndividual.Controls.Add(this.btnIndAdd);
+        this.tabIndividual.Controls.Add(this.txtIndDesc);
+        this.tabIndividual.Controls.Add(this.lblIndDesc);
+        this.tabIndividual.Controls.Add(this.txtIndNick);
+        this.tabIndividual.Controls.Add(this.lblIndNick);
+        this.tabIndividual.Location = new System.Drawing.Point(4, 29);
+        this.tabIndividual.Name = "tabIndividual";
+        this.tabIndividual.Padding = new System.Windows.Forms.Padding(3);
+        this.tabIndividual.Size = new System.Drawing.Size(746, 454);
+        this.tabIndividual.TabIndex = 3;
+        this.tabIndividual.Text = "👋 Обращения";
+        this.tabIndividual.UseVisualStyleBackColor = true;
+        //
+        // lblIndNick
+        //
+        this.lblIndNick.AutoSize = true;
+        this.lblIndNick.Location = new System.Drawing.Point(13, 16);
+        this.lblIndNick.Name = "lblIndNick";
+        this.lblIndNick.Size = new System.Drawing.Size(70, 20);
+        this.lblIndNick.TabIndex = 0;
+        this.lblIndNick.Text = "Ник";
+        //
+        // txtIndNick
+        //
+        this.txtIndNick.Location = new System.Drawing.Point(90, 13);
+        this.txtIndNick.Name = "txtIndNick";
+        this.txtIndNick.Size = new System.Drawing.Size(220, 27);
+        this.txtIndNick.TabIndex = 1;
+        //
+        // lblIndDesc
+        //
+        this.lblIndDesc.AutoSize = true;
+        this.lblIndDesc.Location = new System.Drawing.Point(13, 50);
+        this.lblIndDesc.Name = "lblIndDesc";
+        this.lblIndDesc.Size = new System.Drawing.Size(170, 20);
+        this.lblIndDesc.TabIndex = 2;
+        this.lblIndDesc.Text = "Варианты обращений (через ;)";
+        //
+        // txtIndDesc
+        //
+        this.txtIndDesc.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+        | System.Windows.Forms.AnchorStyles.Right)));
+        this.txtIndDesc.Location = new System.Drawing.Point(13, 74);
+        this.txtIndDesc.Multiline = true;
+        this.txtIndDesc.Name = "txtIndDesc";
+        this.txtIndDesc.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+        this.txtIndDesc.Size = new System.Drawing.Size(717, 70);
+        this.txtIndDesc.TabIndex = 3;
+        //
+        // btnIndAdd
+        //
+        this.btnIndAdd.BackColor = System.Drawing.Color.FromArgb(88, 101, 242);
+        this.btnIndAdd.ForeColor = System.Drawing.Color.White;
+        this.btnIndAdd.Location = new System.Drawing.Point(90, 152);
+        this.btnIndAdd.Name = "btnIndAdd";
+        this.btnIndAdd.Size = new System.Drawing.Size(130, 34);
+        this.btnIndAdd.TabIndex = 4;
+        this.btnIndAdd.Text = "➕ Добавить";
+        this.btnIndAdd.UseVisualStyleBackColor = false;
+        this.btnIndAdd.Click += new System.EventHandler(this.BtnIndAdd_Click);
+        //
+        // btnIndUpdate
+        //
+        this.btnIndUpdate.BackColor = System.Drawing.Color.FromArgb(38, 166, 91);
+        this.btnIndUpdate.ForeColor = System.Drawing.Color.White;
+        this.btnIndUpdate.Location = new System.Drawing.Point(230, 152);
+        this.btnIndUpdate.Name = "btnIndUpdate";
+        this.btnIndUpdate.Size = new System.Drawing.Size(130, 34);
+        this.btnIndUpdate.TabIndex = 5;
+        this.btnIndUpdate.Text = "✏️ Обновить";
+        this.btnIndUpdate.UseVisualStyleBackColor = false;
+        this.btnIndUpdate.Click += new System.EventHandler(this.BtnIndUpdate_Click);
+        //
+        // btnIndDelete
+        //
+        this.btnIndDelete.Location = new System.Drawing.Point(370, 152);
+        this.btnIndDelete.Name = "btnIndDelete";
+        this.btnIndDelete.Size = new System.Drawing.Size(130, 34);
+        this.btnIndDelete.TabIndex = 6;
+        this.btnIndDelete.Text = "🗑 Удалить";
+        this.btnIndDelete.UseVisualStyleBackColor = true;
+        this.btnIndDelete.Click += new System.EventHandler(this.BtnIndDelete_Click);
+        //
+        // dgvIndividual
+        //
+        this.dgvIndividual.AllowUserToAddRows = false;
+        this.dgvIndividual.AllowUserToDeleteRows = false;
+        this.dgvIndividual.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+        | System.Windows.Forms.AnchorStyles.Left)
+        | System.Windows.Forms.AnchorStyles.Right)));
+        this.dgvIndividual.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+        this.dgvIndividual.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        this.dgvIndividual.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colIndId,
+            this.colIndNick,
+            this.colIndDesc,
+            this.colIndUpdated});
+        dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+        dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+        dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+        dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+        dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+        dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+        dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+        this.dgvIndividual.DefaultCellStyle = dataGridViewCellStyle2;
+        this.dgvIndividual.Location = new System.Drawing.Point(13, 194);
+        this.dgvIndividual.MultiSelect = false;
+        this.dgvIndividual.Name = "dgvIndividual";
+        this.dgvIndividual.ReadOnly = true;
+        this.dgvIndividual.RowHeadersVisible = false;
+        this.dgvIndividual.RowTemplate.Height = 29;
+        this.dgvIndividual.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+        this.dgvIndividual.Size = new System.Drawing.Size(717, 254);
+        this.dgvIndividual.TabIndex = 7;
+        this.dgvIndividual.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvIndividual_CellDoubleClick);
+        //
+        // colIndId
+        //
+        this.colIndId.FillWeight = 25F;
+        this.colIndId.HeaderText = "ID";
+        this.colIndId.MinimumWidth = 40;
+        this.colIndId.Name = "colIndId";
+        //
+        // colIndNick
+        //
+        this.colIndNick.FillWeight = 60F;
+        this.colIndNick.HeaderText = "Ник";
+        this.colIndNick.MinimumWidth = 70;
+        this.colIndNick.Name = "colIndNick";
+        //
+        // colIndDesc
+        //
+        this.colIndDesc.FillWeight = 150F;
+        this.colIndDesc.HeaderText = "Варианты обращений";
+        this.colIndDesc.MinimumWidth = 100;
+        this.colIndDesc.Name = "colIndDesc";
+        //
+        // colIndUpdated
+        //
+        this.colIndUpdated.FillWeight = 55F;
+        this.colIndUpdated.HeaderText = "Обновлено";
+        this.colIndUpdated.MinimumWidth = 80;
+        this.colIndUpdated.Name = "colIndUpdated";
         // 
         // lblWord
         // 
@@ -478,11 +927,17 @@ partial class Form1
         this.Text = "База знаний Dan Games";
         ((System.ComponentModel.ISupportInitialize)(this.dgvKnowledge)).EndInit();
         ((System.ComponentModel.ISupportInitialize)(this.dgvWords)).EndInit();
+        ((System.ComponentModel.ISupportInitialize)(this.dgvProviders)).EndInit();
+        ((System.ComponentModel.ISupportInitialize)(this.dgvIndividual)).EndInit();
         this.tabControl.ResumeLayout(false);
         this.tabKnowledge.ResumeLayout(false);
         this.tabKnowledge.PerformLayout();
         this.tabWords.ResumeLayout(false);
         this.tabWords.PerformLayout();
+        this.tabProviders.ResumeLayout(false);
+        this.tabProviders.PerformLayout();
+        this.tabIndividual.ResumeLayout(false);
+        this.tabIndividual.PerformLayout();
         this.ResumeLayout(false);
         this.PerformLayout();
     }
@@ -515,6 +970,43 @@ partial class Form1
     private System.Windows.Forms.Button btnSearchWord;
     private System.Windows.Forms.TextBox txtSearchWord;
     private System.Windows.Forms.DataGridView dgvWords;
+    private System.Windows.Forms.TabPage tabProviders;
+    private System.Windows.Forms.Label lblProvName;
+    private System.Windows.Forms.TextBox txtProvName;
+    private System.Windows.Forms.Label lblProvUrl;
+    private System.Windows.Forms.TextBox txtProvUrl;
+    private System.Windows.Forms.Label lblProvKey;
+    private System.Windows.Forms.TextBox txtProvKey;
+    private System.Windows.Forms.Label lblProvModel;
+    private System.Windows.Forms.TextBox txtProvModel;
+    private System.Windows.Forms.Label lblProvDesc;
+    private System.Windows.Forms.TextBox txtProvDesc;
+    private System.Windows.Forms.CheckBox chkProvActive;
+    private System.Windows.Forms.Button btnProvAdd;
+    private System.Windows.Forms.Button btnProvUpdate;
+    private System.Windows.Forms.Button btnProvDelete;
+    private System.Windows.Forms.Button btnProvActivate;
+    private System.Windows.Forms.Button btnProvTest;
+    private System.Windows.Forms.DataGridView dgvProviders;
+    private System.Windows.Forms.DataGridViewTextBoxColumn colProvId;
+    private System.Windows.Forms.DataGridViewTextBoxColumn colProvName;
+    private System.Windows.Forms.DataGridViewTextBoxColumn colProvUrl;
+    private System.Windows.Forms.DataGridViewTextBoxColumn colProvModel;
+    private System.Windows.Forms.DataGridViewTextBoxColumn colProvActive;
+    private System.Windows.Forms.DataGridViewTextBoxColumn colProvDesc;
+    private System.Windows.Forms.TabPage tabIndividual;
+    private System.Windows.Forms.Label lblIndNick;
+    private System.Windows.Forms.TextBox txtIndNick;
+    private System.Windows.Forms.Label lblIndDesc;
+    private System.Windows.Forms.TextBox txtIndDesc;
+    private System.Windows.Forms.Button btnIndAdd;
+    private System.Windows.Forms.Button btnIndUpdate;
+    private System.Windows.Forms.Button btnIndDelete;
+    private System.Windows.Forms.DataGridView dgvIndividual;
+    private System.Windows.Forms.DataGridViewTextBoxColumn colIndId;
+    private System.Windows.Forms.DataGridViewTextBoxColumn colIndNick;
+    private System.Windows.Forms.DataGridViewTextBoxColumn colIndDesc;
+    private System.Windows.Forms.DataGridViewTextBoxColumn colIndUpdated;
     private System.Windows.Forms.DataGridViewTextBoxColumn colWordId;
     private System.Windows.Forms.DataGridViewTextBoxColumn colWordText;
     private System.Windows.Forms.DataGridViewTextBoxColumn colWordNote;

@@ -8,10 +8,11 @@
 import pg from "pg";
 import { retrieve } from "../discord/rag.mjs";
 import { moderateMessage } from "./moderation.mjs";
+import { askModel } from "./ai-provider.mjs";
+import { getPersonalGreetingInstruction } from "./greeting.mjs";
 
 const {
   TELEGRAM_BOT_TOKEN,
-  GROQ_API_KEY,
   DATABASE_URL,
   POLL_SECRET,
   OWNER_USERNAME = "danvr2013",
@@ -81,28 +82,15 @@ async function restrictUser(chatId, userId, untilUnix) {
   });
 }
 
-// ── Groq AI ────────────────────────────────────────────────────────────────
+// ── ИИ (мульти-провайдерный через ai-provider.mjs) ─────────────────────────
 
-async function askAi(userText, ragContext) {
-  if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY not set");
-  const system = ragContext ? `${SYSTEM_PROMPT}\n\n${ragContext}` : SYSTEM_PROMPT;
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages: [{ role: "system", content: system }, { role: "user", content: userText }],
-      max_tokens: 800,
-      temperature: 0.7,
-    }),
-    signal: AbortSignal.timeout(30000),
-  });
-  const text = await response.text();
-  if (!response.ok) throw new Error(`Groq ${response.status}: ${text.slice(0, 300)}`);
-  const data = JSON.parse(text);
-  const answer = data?.choices?.[0]?.message?.content;
-  if (!answer?.trim()) throw new Error("Groq empty response");
-  return answer.trim();
+async function askAi(userText, ragContext, username) {
+  let system = ragContext ? `${SYSTEM_PROMPT}\n\n${ragContext}` : SYSTEM_PROMPT;
+  system += await getPersonalGreetingInstruction(username);
+  return askModel([
+    { role: "system", content: system },
+    { role: "user", content: userText },
+  ]);
 }
 
 // ── Обработка одного апдейта ────────────────────────────────────────────────
@@ -169,7 +157,7 @@ async function handleUpdate(update) {
 
   let rag = "";
   try { rag = await retrieve(content); } catch (err) { console.warn("RAG skipped:", err.message); }
-  const answer = await askAi(content, rag);
+  const answer = await askAi(content, rag, username);
   await sendMessage(chatId, answer);
   return { answered: true };
 }
