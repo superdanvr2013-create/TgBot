@@ -159,11 +159,13 @@ partial class Form1
         this.txtDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
         | System.Windows.Forms.AnchorStyles.Right)));
         this.txtDescription.Location = new System.Drawing.Point(120, 97);
+        this.txtDescription.MaxLength = 10000000;
         this.txtDescription.Multiline = true;
         this.txtDescription.Name = "txtDescription";
-        this.txtDescription.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+        this.txtDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
         this.txtDescription.Size = new System.Drawing.Size(650, 100);
         this.txtDescription.TabIndex = 5;
+        this.txtDescription.WordWrap = false;
         // 
         // btnSave
         // 

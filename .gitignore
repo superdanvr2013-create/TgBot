@@ -17,3 +17,5 @@ node_modules/
 KnowledgeEditor/config.json
 KnowledgeEditor/config.local.json
 KnowledgeEditor/config.json
+
+.vercel
