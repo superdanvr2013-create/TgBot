@@ -6,6 +6,9 @@
     },
     "api/db.mjs": {
       "maxDuration": 30
+    },
+    "api/telegram-poll.mjs": {
+      "maxDuration": 60
     }
   }
 }
