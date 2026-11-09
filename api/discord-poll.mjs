@@ -3,6 +3,7 @@ import { retrieve } from "../discord/rag.mjs";
 import { moderateMessage } from "./moderation.mjs";
 import { askModel } from "./ai-provider.mjs";
 import { getPersonalGreetingInstruction } from "./greeting.mjs";
+import { fetchImageAsDataUrl, buildVisionContent } from "./vision.mjs";
 
 const {
   DISCORD_TOKEN,
@@ -78,6 +79,32 @@ async function askAi(userText, ragContext, username) {
     { role: "system", content: system },
     { role: "user", content: userText },
   ]);
+}
+
+// Vision-запрос: текст + сжатые картинки
+async function askAiWithImages(userText, imageDataUrls, ragContext, username) {
+  let system = ragContext ? `${SYSTEM_PROMPT}\n\n${ragContext}` : SYSTEM_PROMPT;
+  system += await getPersonalGreetingInstruction(username);
+  system += "\nЕсли к сообщению приложены изображения — внимательно рассмотри их и учитывай содержимое в ответе. Если на картинке есть текст — прочитай его (OCR) и приведи в ответе.";
+  return askModel([
+    { role: "system", content: system },
+    { role: "user", content: buildVisionContent(userText, imageDataUrls) },
+  ]);
+}
+
+// ── Скачивание вложений Discord ────────────────────────────────────────────
+
+async function downloadDiscordAttachment(attachment) {
+  const response = await fetch(attachment.url, { signal: AbortSignal.timeout(20000) });
+  return fetchImageAsDataUrl(response, attachment.content_type || "image/jpeg");
+}
+
+// Извлекает картинки из сообщения Discord (до 3 шт.)
+function extractImageAttachments(message) {
+  const attachments = Array.isArray(message.attachments) ? message.attachments : [];
+  return attachments
+    .filter((a) => (a.content_type || "").startsWith("image/"))
+    .slice(0, 3);
 }
 
 function parseManual(content, phrase) {
@@ -173,8 +200,13 @@ async function pollChannel(channelId) {
   for (const message of ordered) {
     if (message.id === lastId) continue;
     newest = message.id;
-    if (message.author?.bot || !message.content?.trim()) continue;
-    const content = message.content.trim();
+    if (message.author?.bot) continue;
+
+    const content = (message.content || "").trim();
+    const imageAttachments = extractImageAttachments(message);
+
+    // Сообщения без текста И без картинок — пропускаем
+    if (!content && imageAttachments.length === 0) continue;
 
     // ── Модерация: проверяется КАЖДОЕ сообщение (спам/оскорбления) ──────
     try {
@@ -205,21 +237,54 @@ async function pollChannel(channelId) {
 
     // ── Обычная обработка: только сообщения, адресованные боту ──────────
     const mentioned = content.includes(`<@${process.env.DISCORD_CLIENT_ID || "__none__"}>`);
-    if (!mentioned && !/bot|бот/i.test(content)) continue;
+    const addressed = mentioned || /bot|бот/i.test(content);
 
-    try {
-      const command = await commandReply(channelId, message.author, content);
-      if (command) {
-        await sendMessage(channelId, command);
-      } else {
-        let rag = "";
-        try { rag = await retrieve(content); } catch (err) { console.warn("RAG skipped:", err.message); }
-        await sendMessage(channelId, await askAi(content, rag, message.author?.username));
+    // Картинки: реагируем только при обращении к боту (текст с «бот»/«bot» или упоминание)
+    if (imageAttachments.length > 0) {
+      if (!addressed) continue; // просто скинутая картинка — игнор
+
+      // Скачиваем и сжимаем все картинки
+      const imageDataUrls = [];
+      for (const att of imageAttachments) {
+        try {
+          imageDataUrls.push(await downloadDiscordAttachment(att));
+        } catch (err) {
+          console.warn("attachment download failed:", err.message);
+        }
       }
-      processed++;
-    } catch (err) {
-      console.error("Message processing error:", err.message);
-      await sendMessage(channelId, "Извини, сейчас не могу ответить. Попробуй через минуту.").catch(() => {});
+      if (imageDataUrls.length === 0) {
+        await sendMessage(channelId, "Не смог скачать картинку 😔 Попробуй отправить её ещё раз.").catch(() => {});
+        continue;
+      }
+
+      try {
+        const userText = content || "Что на этой картинке? Опиши подробно, прочитай текст если есть.";
+        let rag = "";
+        try { rag = await retrieve(userText); } catch (err) { console.warn("RAG skipped:", err.message); }
+        await sendMessage(channelId, await askAiWithImages(userText, imageDataUrls, rag, message.author?.username));
+        processed++;
+      } catch (err) {
+        console.error("Vision processing error:", err.message);
+        await sendMessage(channelId, "Извини, не смог обработать картинку. Попробуй ещё раз.").catch(() => {});
+      }
+    } else {
+      // Обычное текстовое сообщение
+      if (!addressed) continue;
+
+      try {
+        const command = await commandReply(channelId, message.author, content);
+        if (command) {
+          await sendMessage(channelId, command);
+        } else {
+          let rag = "";
+          try { rag = await retrieve(content); } catch (err) { console.warn("RAG skipped:", err.message); }
+          await sendMessage(channelId, await askAi(content, rag, message.author?.username));
+        }
+        processed++;
+      } catch (err) {
+        console.error("Message processing error:", err.message);
+        await sendMessage(channelId, "Извини, сейчас не могу ответить. Попробуй через минуту.").catch(() => {});
+      }
     }
 
     // Persist the cursor after each message so progress survives early termination.
