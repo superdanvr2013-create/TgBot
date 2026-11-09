@@ -3,6 +3,9 @@
   "functions": {
     "api/discord-poll.mjs": {
       "maxDuration": 60
+    },
+    "api/db.mjs": {
+      "maxDuration": 30
     }
   }
 }

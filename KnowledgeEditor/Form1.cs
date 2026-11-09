@@ -40,10 +40,12 @@ public partial class Form1 : Form
     {
         try
         {
-            _repo = new KnowledgeRepository(_config.ConnectionString);
+            _repo = new KnowledgeRepository(_config);
             _embed = new EmbeddingClient(_config.EmbedUrl, _config.EmbedApiKey, _config.EmbedModel);
-            _wordsRepo = new WordsRepository(_config.ConnectionString);
-            SetStatus("Подключение настроено.", StatusKind.Ok);
+            _wordsRepo = new WordsRepository(_config);
+            SetStatus(_config.DbMode == "direct"
+                ? "Подключение настроено (прямое к БД)."
+                : "Подключение настроено (через Vercel API).", StatusKind.Ok);
         }
         catch (Exception ex)
         {

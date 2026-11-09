@@ -1,15 +1,29 @@
+using System.Text.Json.Serialization;
 using Npgsql;
 
 namespace KnowledgeEditor;
 
-/// <summary>Persistence layer: insert/update/delete/list knowledge rows in Supabase (pgvector).</summary>
+/// <summary>
+/// Persistence layer для knowledge (pgvector). Два режима:
+/// - "api": REST через Vercel /api/db (работает из РФ без VPN);
+/// - "direct": Npgsql напрямую (требует доступности Supabase, например через VPN).
+/// </summary>
 public sealed class KnowledgeRepository
 {
     private readonly string _connectionString;
+    private readonly DbApiClient? _api;
 
-    public KnowledgeRepository(string connectionString)
+    public KnowledgeRepository(AppConfig config)
     {
-        _connectionString = Normalize(connectionString);
+        if (config.DbMode == "direct")
+        {
+            _connectionString = Normalize(config.ConnectionString);
+        }
+        else
+        {
+            _api = new DbApiClient(config.ApiUrl, config.ApiSecret);
+            _connectionString = "";
+        }
     }
 
     /// <summary>
@@ -46,10 +60,9 @@ public sealed class KnowledgeRepository
                 Username = user,
                 Password = pass,
                 SslMode = SslMode.Require,
-                Timeout = 60,           // connection open (bootstrap = load types) может быть медленным
+                Timeout = 60,
                 CommandTimeout = 60,
                 CancellationTimeout = 30,
-                // Pooler: держим меньше соединений, но с запасом времени на открытие
                 MaxPoolSize = 4,
                 ConnectionIdleLifetime = 60,
             };
@@ -59,9 +72,138 @@ public sealed class KnowledgeRepository
         return s;
     }
 
+    // ── API-режим: DTO под JSON Vercel ───────────────────────────────────────
+
+    private sealed class ApiRow
+    {
+        [JsonPropertyName("id")] public long Id { get; set; }
+        [JsonPropertyName("theme")] public string Theme { get; set; } = "";
+        [JsonPropertyName("description")] public string Description { get; set; } = "";
+        [JsonPropertyName("created_at")] public DateTime CreatedAt { get; set; }
+        [JsonPropertyName("updated_at")] public DateTime UpdatedAt { get; set; }
+        [JsonPropertyName("has_embedding")] public bool HasEmbedding { get; set; }
+    }
+
+    private static KnowledgeRow ToRow(ApiRow r) => new()
+    {
+        Id = r.Id,
+        Theme = r.Theme,
+        Description = r.Description,
+        CreatedAt = DateTime.Parse(r.CreatedAt.ToString("o")).ToUniversalTime().ToLocalTime(),
+        UpdatedAt = DateTime.Parse(r.UpdatedAt.ToString("o")).ToUniversalTime().ToLocalTime(),
+        HasEmbedding = r.HasEmbedding,
+    };
+
+    // ── Публичные операции ────────────────────────────────────────────────────
+
+    public async Task<long> UpsertAsync(string theme, string description, float[] embedding)
+    {
+        if (_api is not null)
+        {
+            return await _api.UpsertKnowledgeAsync(theme, description, ToVectorJson(embedding));
+        }
+
+        await using var conn = await OpenWithRetryAsync();
+        const string sql = """
+            INSERT INTO knowledge (theme, description, embedding)
+            VALUES (@theme, @description, @embedding::vector)
+            ON CONFLICT (theme) DO UPDATE
+              SET description = EXCLUDED.description,
+                  embedding    = EXCLUDED.embedding,
+                  updated_at   = now()
+            RETURNING id;
+            """;
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("theme", theme);
+        cmd.Parameters.AddWithValue("description", description);
+        cmd.Parameters.AddWithValue("embedding", ToVectorJson(embedding));
+        var id = await cmd.ExecuteScalarAsync();
+        return (long)id!;
+    }
+
+    public async Task<long> UpdateAsync(long id, string theme, string description, float[] embedding)
+    {
+        if (_api is not null)
+        {
+            return await _api.UpdateKnowledgeAsync(id, theme, description, ToVectorJson(embedding));
+        }
+
+        await using var conn = await OpenWithRetryAsync();
+        const string sql = """
+            UPDATE knowledge
+               SET theme       = @theme,
+                   description = @description,
+                   embedding   = @embedding::vector,
+                   updated_at  = now()
+             WHERE id = @id
+            RETURNING id;
+            """;
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("id", id);
+        cmd.Parameters.AddWithValue("theme", theme);
+        cmd.Parameters.AddWithValue("description", description);
+        cmd.Parameters.AddWithValue("embedding", ToVectorJson(embedding));
+        var res = await cmd.ExecuteScalarAsync();
+        if (res is null) throw new InvalidOperationException($"Запись с id={id} не найдена.");
+        return (long)res;
+    }
+
+    public async Task<IReadOnlyList<KnowledgeRow>> ListAsync(int limit = 200)
+    {
+        if (_api is not null)
+        {
+            var rows = await _api.ListAsync<ApiRow>("knowledge");
+            return rows.Select(ToRow).ToList();
+        }
+
+        await using var conn = await OpenWithRetryAsync();
+        const string sql = """
+            SELECT id, theme, description, created_at, updated_at, embedding IS NOT NULL AS has_embedding
+              FROM knowledge
+             ORDER BY updated_at DESC
+             LIMIT @limit;
+            """;
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("limit", limit);
+        var rowsOut = new List<KnowledgeRow>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            rowsOut.Add(new KnowledgeRow
+            {
+                Id = reader.GetInt64(0),
+                Theme = reader.GetString(1),
+                Description = reader.GetString(2),
+                CreatedAt = reader.GetDateTime(3),
+                UpdatedAt = reader.GetDateTime(4),
+                HasEmbedding = reader.GetBoolean(5),
+            });
+        }
+        return rowsOut;
+    }
+
+    public async Task DeleteAsync(long id)
+    {
+        if (_api is not null)
+        {
+            await _api.DeleteKnowledgeAsync(id);
+            return;
+        }
+
+        await using var conn = await OpenWithRetryAsync();
+        await using var cmd = new NpgsqlCommand("DELETE FROM knowledge WHERE id = @id;", conn);
+        cmd.Parameters.AddWithValue("id", id);
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    /// <summary>Вектор в текстовом JSON: [0.12,0.34,...] — формат pgvector.</summary>
+    private static string ToVectorJson(float[] embedding)
+        => "[" + string.Join(",", embedding.Select(x => x.ToString(System.Globalization.CultureInfo.InvariantCulture))) + "]";
+
+    // ── Direct-режим: соединения с retry ──────────────────────────────────────
+
     private NpgsqlConnection Open() => new(_connectionString);
 
-    /// <summary>Открывает соединение с повторами: транзитные обрывы сети к Supabase не редкость.</summary>
     private async Task<NpgsqlConnection> OpenWithRetryAsync(int attempts = 3)
     {
         Exception? last = null;
@@ -81,105 +223,6 @@ public sealed class KnowledgeRepository
             }
         }
         throw last!;
-    }
-
-    public async Task<long> UpsertAsync(string theme, string description, float[] embedding)
-    {
-        // Insert with embedding; on theme conflict, update description + embedding.
-        await using var conn = await OpenWithRetryAsync();
-
-        const string sql = """
-            INSERT INTO knowledge (theme, description, embedding)
-            VALUES (@theme, @description, @embedding::vector)
-            ON CONFLICT (theme) DO UPDATE
-              SET description = EXCLUDED.description,
-                  embedding    = EXCLUDED.embedding,
-                  updated_at   = now()
-            RETURNING id;
-            """;
-        await using var cmd = new NpgsqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("theme", theme);
-        cmd.Parameters.AddWithValue("description", description);
-        // pgvector: cast text -> vector explicitly (deterministic on both pooler modes)
-        cmd.Parameters.AddWithValue("embedding", "[" + string.Join(",", embedding.Select(x => x.ToString(System.Globalization.CultureInfo.InvariantCulture))) + "]");
-        var id = await cmd.ExecuteScalarAsync();
-        return (long)id!;
-    }
-
-    public async Task<long> UpdateAsync(long id, string theme, string description, float[] embedding)
-    {
-        // Update an existing row by its id (theme can be changed too).
-        await using var conn = await OpenWithRetryAsync();
-
-        const string sql = """
-            UPDATE knowledge
-               SET theme       = @theme,
-                   description = @description,
-                   embedding   = @embedding::vector,
-                   updated_at  = now()
-             WHERE id = @id
-            RETURNING id;
-            """;
-        await using var cmd = new NpgsqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("id", id);
-        cmd.Parameters.AddWithValue("theme", theme);
-        cmd.Parameters.AddWithValue("description", description);
-        cmd.Parameters.AddWithValue("embedding", "[" + string.Join(",", embedding.Select(x => x.ToString(System.Globalization.CultureInfo.InvariantCulture))) + "]");
-        var res = await cmd.ExecuteScalarAsync();
-        if (res is null) throw new InvalidOperationException($"Запись с id={id} не найдена.");
-        return (long)res;
-    }
-
-    public async Task<IReadOnlyList<KnowledgeRow>> ListAsync(int limit = 200)
-    {
-        await using var conn = await OpenWithRetryAsync();
-        const string sql = """
-            SELECT id, theme, description, created_at, updated_at, embedding IS NOT NULL AS has_embedding
-              FROM knowledge
-             ORDER BY updated_at DESC
-             LIMIT @limit;
-            """;
-        await using var cmd = new NpgsqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("limit", limit);
-        var rows = new List<KnowledgeRow>();
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            rows.Add(new KnowledgeRow
-            {
-                Id = reader.GetInt64(0),
-                Theme = reader.GetString(1),
-                Description = reader.GetString(2),
-                CreatedAt = reader.GetDateTime(3),
-                UpdatedAt = reader.GetDateTime(4),
-                HasEmbedding = reader.GetBoolean(5),
-            });
-        }
-        return rows;
-    }
-
-    public async Task DeleteAsync(long id)
-    {
-        await using var conn = await OpenWithRetryAsync();
-        const string sql = "DELETE FROM knowledge WHERE id = @id;";
-        await using var cmd = new NpgsqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("id", id);
-        await cmd.ExecuteNonQueryAsync();
-    }
-
-    public async Task<bool> HealthAsync()
-    {
-        try
-        {
-            await using var conn = await OpenWithRetryAsync();
-            await using var cmd = new NpgsqlCommand("SELECT 1;", conn);
-            await cmd.ExecuteScalarAsync();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
     }
 }
 
