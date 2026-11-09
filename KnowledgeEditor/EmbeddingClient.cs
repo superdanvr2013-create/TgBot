@@ -44,7 +44,7 @@ public sealed class EmbeddingClient
             throw new InvalidOperationException($"Embedding server {res.StatusCode}: {body[..Math.Min(body.Length, 300)]}");
         }
         var data = await res.Content.ReadFromJsonAsync<EmbedResponse>();
-        var embedding = data?.Data?[0].Embedding;
+        var embedding = data?.Embedding;
         if (embedding is null || embedding.Count == 0)
             throw new InvalidOperationException("Embedding server returned an empty vector.");
         return embedding.ToArray();
@@ -75,11 +75,7 @@ public sealed class EmbeddingClient
 
     private sealed class EmbedResponse
     {
-        [JsonPropertyName("embedding")] public List<EmbedData>? Data { get; set; }
-    }
-
-    private sealed class EmbedData
-    {
+        // Прокси отдаёт плоский массив: {"ok":true,"embedding":[0.1,0.2,...]}
         [JsonPropertyName("embedding")] public List<float>? Embedding { get; set; }
     }
 }
