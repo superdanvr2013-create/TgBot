@@ -9,6 +9,9 @@
     },
     "api/telegram-poll.mjs": {
       "maxDuration": 60
+    },
+    "api/embed.mjs": {
+      "maxDuration": 60
     }
   }
 }
