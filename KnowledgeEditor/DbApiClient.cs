@@ -17,7 +17,13 @@ public sealed class DbApiClient
     public DbApiClient(string baseUrl, string secret)
     {
         _baseUrl = baseUrl.TrimEnd('/');
-        _http = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+        _http = new HttpClient(new SocketsHttpHandler
+        {
+            // новые соединения на каждый ретрай: оборванное TLS-соединение не кэшируется
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            ConnectTimeout = TimeSpan.FromSeconds(20),
+        })
+        { Timeout = TimeSpan.FromSeconds(60) };
         _http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", secret);
     }
 
@@ -46,18 +52,47 @@ public sealed class DbApiClient
     {
         var url = $"{_baseUrl}?table={Uri.EscapeDataString(table)}";
         if (!string.IsNullOrWhiteSpace(filter)) url += $"&filter={Uri.EscapeDataString(filter)}";
-        using var resp = await _http.GetAsync(url);
-        var result = await ReadAsync<RowsResponse<T>>(resp);
-        return result.Rows ?? new();
+        return await SendWithRetryAsync(async () =>
+        {
+            using var resp = await _http.GetAsync(url);
+            var result = await ReadAsync<RowsResponse<T>>(resp);
+            return result.Rows ?? new();
+        });
     }
 
     // ── POST ───────────────────────────────────────────────────────────────
 
     public async Task<long> PostAsync(object command)
     {
-        using var resp = await _http.PostAsJsonAsync(_baseUrl, command);
-        var result = await ReadAsync<WriteResponse>(resp);
-        return result.Id;
+        return await SendWithRetryAsync(async () =>
+        {
+            using var resp = await _http.PostAsJsonAsync(_baseUrl, command);
+            var result = await ReadAsync<WriteResponse>(resp);
+            return result.Id;
+        });
+    }
+
+    /// <summary>
+    /// Транзитные TLS-обрывы (DPI) к Vercel случаются регулярно: повторяем запрос
+    /// до 4 раз с паузами. Идемпотентные GET безопасны; POST-операции БД
+    /// тоже повторяем — upsert/add идемпотентны по слову/теме, delete безопасен.
+    /// </summary>
+    private static async Task<T> SendWithRetryAsync<T>(Func<Task<T>> send, int attempts = 4)
+    {
+        Exception? last = null;
+        for (var i = 1; i <= attempts; i++)
+        {
+            try
+            {
+                return await send();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException)
+            {
+                last = ex;
+                if (i < attempts) await Task.Delay(i * 1500);
+            }
+        }
+        throw last!;
     }
 
     public async Task<long> AddWordAsync(string word, string note)
