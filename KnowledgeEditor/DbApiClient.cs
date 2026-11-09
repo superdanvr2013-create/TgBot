@@ -27,22 +27,27 @@ public sealed class DbApiClient
         _http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", secret);
     }
 
+    // node-postgres возвращает bigint как строки ("79") — разрешаем чтение чисел из строк
+    private static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        NumberHandling = JsonNumberHandling.AllowReadingFromString,
+    };
+
     private static async Task<T> ReadAsync<T>(HttpResponseMessage resp) where T : class
     {
         var body = await resp.Content.ReadAsStringAsync();
         if (!resp.IsSuccessStatusCode)
         {
-            // error: {"error":"..."} или {"ok":false,"error":"..."}
             try
             {
-                var doc = System.Text.Json.JsonDocument.Parse(body);
+                var doc = JsonDocument.Parse(body);
                 if (doc.RootElement.TryGetProperty("error", out var errEl))
                     throw new Exception($"HTTP {(int)resp.StatusCode}: {errEl.GetString()}");
             }
             catch (JsonException) { }
             throw new Exception($"HTTP {(int)resp.StatusCode}: {body}");
         }
-        var result = System.Text.Json.JsonSerializer.Deserialize<T>(body);
+        var result = JsonSerializer.Deserialize<T>(body, JsonOpts);
         return result ?? throw new Exception("Пустой ответ API");
     }
 
