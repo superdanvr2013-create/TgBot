@@ -248,9 +248,34 @@ async function init() {
   const params = new URLSearchParams(location.search);
   const left = (params.get("left") || "").split("|").filter(Boolean);
   const right = (params.get("right") || "").split("|").filter(Boolean);
+  
+  // Диагностика в интерфейсе
+  const diag = document.createElement("div");
+  diag.style.cssText = "background:#222;padding:10px;margin:10px;font-size:11px;color:#aaa;font-family:monospace;white-space:pre-wrap;";
+  diag.textContent = `DEBUG: left=${JSON.stringify(left)} right=${JSON.stringify(right)} secret=${POLL_SECRET ? "OK" : "MISSING"}`;
+  document.body.insertBefore(diag, document.body.firstChild);
+
+  if (left.length === 0 && right.length === 0) {
+    document.getElementById("leftList").innerHTML = `
+      <div style='color:#f87171;padding:20px;text-align:center'>
+        <div style='font-size:18px;margin-bottom:10px'>⚠️ Нет брейнротов в URL</div>
+        <div style='font-size:13px;color:#aaa'>Используй ссылку из Discord (бот присылает её после распознавания картинки)</div>
+        <div style='margin-top:15px;padding:10px;background:#333;border-radius:6px;font-family:monospace;font-size:11px'>
+          Пример:<br>
+          ?left=Hydra Dragon Cannelloni&right=Garama and Madundung
+        </div>
+      </div>`;
+    document.getElementById("rightList").innerHTML = "<div style='color:#f87171;padding:20px'>Нет брейнротов в URL.</div>";
+    return;
+  }
   const r = await fetch(`${API}?left=${encodeURIComponent(left.join("|"))}&right=${encodeURIComponent(right.join("|"))}`, {
     headers: { Authorization: `Bearer ${POLL_SECRET}` },
   });
+  const diag2 = document.createElement("div");
+  diag2.style.cssText = "background:#333;padding:10px;margin:10px;font-size:11px;color:#aaa;font-family:monospace;white-space:pre-wrap;";
+  diag2.textContent = `API: ${r.status} ${r.ok ? "OK" : "FAIL"}`;
+  document.body.insertBefore(diag2, diag.nextSibling);
+  
   data = await r.json();
   if (!data.ok) { document.body.innerHTML = `<h1>Ошибка: ${data.error}</h1>`; return; }
   render();
