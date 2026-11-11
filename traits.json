@@ -1,0 +1,680 @@
+[
+  {
+    "name": "Strawberry",
+    "multiplier": 8,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/6/6d/Strawberry.png/revision/latest?cb=20260314223544",
+    "desc": "Strawberry Elephant / Admin Abuse."
+  },
+  {
+    "name": "Meowl",
+    "multiplier": 7,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/f/f9/ICON_Meowl.png/revision/latest?cb=20260313051356",
+    "desc": "Meowl / Admin Abuse."
+  },
+  {
+    "name": "John Pork",
+    "multiplier": 6.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/4a/John_Pork_Trait_HD.webp/revision/latest?cb=20260507152117",
+    "desc": "John Pork / Admin Abuse."
+  },
+  {
+    "name": "Skibidi",
+    "multiplier": 6,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/7/7b/SkibidiIcon.png/revision/latest?cb=20260313051718",
+    "desc": "Skibidi Toilet / Admin Abuse."
+  },
+  {
+    "name": "Granny",
+    "multiplier": 5.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/d/d9/Granny.png/revision/latest?cb=20260321232830",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Fire",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/3/30/Fire.png/revision/latest?cb=20260227200928",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Rose",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/4f/Rose.png/revision/latest?cb=20260709130047",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Fireworks",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/6/62/Fireworks.png/revision/latest?cb=20250816165900",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Nyan",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/9/92/Nyan.png/revision/latest?cb=20250816165016",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Lightning",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/f/f3/Dragon.webp/revision/latest?cb=20250823204444",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Burger",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/2d/Burger_Trait.png/revision/latest?cb=20260530201010",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Aura Shades",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/44/Aura_Shades.png/revision/latest?cb=20260709130022",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Disco",
+    "multiplier": 4,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/85/Disco.webp/revision/latest?cb=20250817152243",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Glitched",
+    "multiplier": 4,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/0/01/Glitch.png/revision/latest?cb=20250816163516",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Claws",
+    "multiplier": 4,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/f/f6/CrabClaw.png/revision/latest?cb=20250816163855",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Zombie",
+    "multiplier": 4,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/83/EvilTungTungSahur.png/revision/latest?cb=20250816162831",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Bubblegum",
+    "multiplier": 3,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/0/02/Bubblegum.png/revision/latest?cb=20250817153235",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Taco",
+    "multiplier": 2,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/4d/Taco.png/revision/latest?cb=20250816162351",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "UFO",
+    "multiplier": 2,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/3/38/Alienevent.webp/revision/latest?cb=20250823200814",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Sleepy",
+    "multiplier": 0.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/a/ab/Sleepy.webp/revision/latest?cb=20250823201344",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Bull",
+    "multiplier": 6,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/c/c6/BullTrait.png/revision/latest?cb=20261107172102",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Paint",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/28/Chicleteirabicicleteira.png/revision/latest?cb=20250915234054",
+    "desc": "Chicleteira Bicicleteira Ritual / Admin Abuse."
+  },
+  {
+    "name": ":3",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/1/10/3.png/revision/latest?cb=20260313065350",
+    "desc": "Mi Gatito Ritual / Admin Abuse."
+  },
+  {
+    "name": "Tie",
+    "multiplier": 3.75,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/8d/Tie.png/revision/latest?cb=20251004125924",
+    "desc": "Dul Dul Dul Ritual / Admin Abuse."
+  },
+  {
+    "name": "Spider",
+    "multiplier": 3.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/a/ad/Spider.webp/revision/latest?cb=20250830230913",
+    "desc": "Sammyni Spyderini Ritual / Admin Abuse."
+  },
+  {
+    "name": "Matteo Hat",
+    "multiplier": 3.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/d/d3/MatteoHat.png/revision/latest?cb=20250817151555",
+    "desc": "Matteo Ritual / Admin Abuse."
+  },
+  {
+    "name": "Galactic",
+    "multiplier": 3,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/c/cb/Comet2.png/revision/latest?cb=20250816170135",
+    "desc": "La Vacca Saturno Saturnita Ritual / Admin Abuse."
+  },
+  {
+    "name": "Explosive",
+    "multiplier": 3,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/4c/Bombardiro.png/revision/latest?cb=20250816170036",
+    "desc": "Bombardiro Crocodilo Ritual / Admin Abuse."
+  },
+  {
+    "name": "Shark Fin",
+    "multiplier": 3,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/4d/Shark_Fin.webp/revision/latest?cb=20250817152529",
+    "desc": "Orcalero Orcala Ritual / Admin Abuse."
+  },
+  {
+    "name": "Job Application",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/1/12/JobTrait.png/revision/latest?cb=20260825104745",
+    "desc": "Job Job Job Sahur Ritual / Admin Abuse."
+  },
+  {
+    "name": "Reindeer Pet",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/24/Reindeer.png/revision/latest?cb=20260313051903",
+    "desc": "Hourly Event on the Christmas Event Board."
+  },
+  {
+    "name": "Santa Hat",
+    "multiplier": 4,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/5/5d/SantaHatIcon.png/revision/latest?cb=20260313052028",
+    "desc": "Winter Hour."
+  },
+  {
+    "name": "Jack O' Lantern Pet",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/7/77/Jack-o-Lantern_Pet_Trait.png/revision/latest?cb=20260314223828",
+    "desc": "Spawns during an hourly rotation of Halloween Events."
+  },
+  {
+    "name": "RIP Gravestone",
+    "multiplier": 3.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/7/75/GraveYard-RIP-Tombstone.png/revision/latest?cb=20260314224005",
+    "desc": "Grave Digger Event."
+  },
+  {
+    "name": "Witch Hat",
+    "multiplier": 3,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/3/39/Witchhat.webp/revision/latest?cb=20251014023329",
+    "desc": "Witching Hour Event."
+  },
+  {
+    "name": "Bunny Ears",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/5/5c/BunnyEars.png/revision/latest?cb=20260328200508",
+    "desc": "Easter Hour."
+  },
+  {
+    "name": "Pink Egg",
+    "multiplier": 6.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/d/d0/PinkEgg.png/revision/latest?cb=20260709115142",
+    "desc": "Egg City."
+  },
+  {
+    "name": "Blue Egg",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/f/f5/BlueEgg.png/revision/latest?cb=20260709115216",
+    "desc": "Egg City."
+  },
+  {
+    "name": "Green Egg",
+    "multiplier": 4,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/84/GreenEgg.png/revision/latest?cb=20260709115207",
+    "desc": "Egg City."
+  },
+  {
+    "name": "Orange Egg",
+    "multiplier": 3,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/f/f9/OrangeEgg.png/revision/latest?cb=20260709115156",
+    "desc": "Egg City."
+  },
+  {
+    "name": "1 Year",
+    "multiplier": 5.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/5/55/1YR_Icon_Fixed.png/revision/latest?cb=20260517005003",
+    "desc": "1 Year Anniversary Event."
+  },
+  {
+    "name": "26",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/a/a7/2026Trait.png/revision/latest?cb=20260313050754",
+    "desc": "New Year's Machine."
+  },
+  {
+    "name": "10B",
+    "multiplier": 3,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/4c/10b.png/revision/latest?cb=20260314224315",
+    "desc": "10 Billion Visits Milestone Event."
+  },
+  {
+    "name": "Rainbow Balloon",
+    "multiplier": 6.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/a/a6/RainbowBalloon.png/revision/latest?cb=20260321232738",
+    "desc": "Eid Celebration."
+  },
+  {
+    "name": "Pink Balloon",
+    "multiplier": 5.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/2c/PinkBalloon.png/revision/latest?cb=20260321232722",
+    "desc": "Eid Celebration."
+  },
+  {
+    "name": "Red Balloon",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/2e/RedBalloon.png/revision/latest?cb=20260321232700",
+    "desc": "Eid Celebration."
+  },
+  {
+    "name": "Blue Balloon",
+    "multiplier": 4,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/f/f4/BlueBalloon.png/revision/latest?cb=20260321232816",
+    "desc": "Eid Celebration"
+  },
+  {
+    "name": "Green Balloon",
+    "multiplier": 3.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/2f/GreenBalloon.png/revision/latest?cb=20260321232802",
+    "desc": "Eid Celebration."
+  },
+  {
+    "name": "Orange Balloon",
+    "multiplier": 3,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/47/OrangeBalloon.png/revision/latest?cb=20260321232750",
+    "desc": "Eid Celebration."
+  },
+  {
+    "name": "Halo",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/e/eb/HaloTraitIcon.png/revision/latest?cb=20260314223649",
+    "desc": "Divine Event."
+  },
+  {
+    "name": "Bee",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/4f/BeeTrait.png/revision/latest?cb=20261107172238",
+    "desc": "Bee Shop event."
+  },
+  {
+    "name": "Fire Bee",
+    "multiplier": 6,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/e/ea/FireBeeTrait.png/revision/latest?cb=20261107172316",
+    "desc": "Bee Shop event."
+  },
+  {
+    "name": "Ice Bee",
+    "multiplier": 6,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/a/a4/IceBeeTrait.png/revision/latest?cb=20261107172331",
+    "desc": "Bee Shop event."
+  },
+  {
+    "name": "Queen Bee",
+    "multiplier": null,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/48/QueenBeeTrait.png/revision/latest?cb=20261107172135",
+    "desc": "Bee Shop event."
+  },
+  {
+    "name": "Witch Skeleton",
+    "multiplier": null,
+    "icon": "",
+    "desc": "—"
+  },
+  {
+    "name": "Lucky",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/a/a6/Lucky.png/revision/latest?cb=20260314200545",
+    "desc": "Lucky Pot."
+  },
+  {
+    "name": "Sun",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/0/09/Summer_Hour.png/revision/latest?cb=20260630210146",
+    "desc": "Summer Hour."
+  },
+  {
+    "name": "Ball",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/7/7b/Ball.png/revision/latest?cb=20260711140433",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Chocolate",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/e/ec/ChocolateTrait.png/revision/latest?cb=20260313052921",
+    "desc": "Valentines Admin Abuses."
+  },
+  {
+    "name": "Skeleton",
+    "multiplier": 3,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/49/Extincty.png/revision/latest?cb=20260314224209",
+    "desc": "Extinct Event."
+  },
+  {
+    "name": "Brazil",
+    "multiplier": 5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/8c/Brazil.png/revision/latest?cb=20250817152030",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Indonesian",
+    "multiplier": 4,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/6/61/Indonesian.png/revision/latest?cb=20251112202133",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Sombrero",
+    "multiplier": 4,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/f/f5/Mexico_Hat.png/revision/latest?cb=20260314224412",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Algeria",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/40/Algeria.png/revision/latest?cb=20260709085338",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Argentina",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/a/a2/Argentina.png/revision/latest?cb=20260709082458",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Australia",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/43/Australia.png/revision/latest?cb=20260709082724",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Austria",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/7/7f/Austria.png/revision/latest?cb=20260709085359",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Belgium",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/3/32/Belgium.png/revision/latest?cb=20260709082619",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Bosnia and Herzegovina",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/a/a9/Bosnia_and_Herzegovina.png/revision/latest?cb=20260709082637",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Canada",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/a/a3/Canada.png/revision/latest?cb=20260709082824",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Cape Verde",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/c/cd/Cape_Verde.png/revision/latest?cb=20260709082703",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Colombia",
+    "multiplier": 6,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/5/52/ColombiaTrait.png/revision/latest?cb=20260905195532",
+    "desc": "Admin Abuse."
+  },
+  {
+    "name": "Croatia",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/9/94/Croatia.png/revision/latest?cb=20260709085659",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Curacao",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/9/95/Curacao.png/revision/latest?cb=20260709082845",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Czechia",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/e/e2/Czechia.png/revision/latest?cb=20260709082947",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "DR Congo",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/4f/DR_Congo.png/revision/latest?cb=20260709085322",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Ecuador",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/b/b2/Ecuador.png/revision/latest?cb=20260709083006",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Egypt",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/3/37/Egypt.png/revision/latest?cb=20260709083051",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "England",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/21/England.png/revision/latest?cb=20260709083142",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "France",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/d/de/France.png/revision/latest?cb=20260709083114",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Germany",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/9/9b/Germany.png/revision/latest?cb=20260709085449",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Ghana",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/88/Ghana.png/revision/latest?cb=20260709085505",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Haiti",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/28/Haiti.png/revision/latest?cb=20260709085522",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Iran",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/d/d1/Iran.png/revision/latest?cb=20260709085539",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Iraq",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/c/c4/Iraq.png/revision/latest?cb=20260709085554",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Ivory Coast",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/81/Ivory_Coast.png/revision/latest?cb=20260709082758",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Japan",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/f/fc/Japan.png/revision/latest?cb=20260709085610",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Jordan",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/e/e4/Jordan.png/revision/latest?cb=20260709085625",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Mexico",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/0/0a/Mexico.png/revision/latest?cb=20260709081706",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Morocco",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/e/e4/Morocco.png/revision/latest?cb=20260709081650",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Netherlands",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/3/32/Netherlands.png/revision/latest?cb=20260709081628",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "New Zealand",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/d/d9/New_Zealand.png/revision/latest?cb=20260709081604",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Norway",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/0/0f/Norway.png/revision/latest?cb=20260709081538",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Panama",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/3/3f/Panama.png/revision/latest?cb=20260709081727",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Paraguay",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/5/57/Paraguay.png/revision/latest?cb=20260709081750",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Portugal",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/1/12/Portugal.png/revision/latest?cb=20260709085136",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Qatar",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/81/Qatar.png/revision/latest?cb=20260709085157",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Saudi Arabia",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/1/1f/Saudi_Arabia.png/revision/latest?cb=20260709085218",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Scotland",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/27/Scotland.png/revision/latest?cb=20260709085239",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Senegal",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/22/Senegal.png/revision/latest?cb=20260709085255",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "South Africa",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/e/ef/South_Africa.png/revision/latest?cb=20260709081808",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "South Korea",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/9/9c/South_Korea.png/revision/latest?cb=20260709081825",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Spain",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/5/58/Spain.png/revision/latest?cb=20260709081843",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Sweden",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/9/98/Sweden.png/revision/latest?cb=20260709081912",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Switzerland",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/0/01/Switzerland.png/revision/latest?cb=20260709081929",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Tunisia",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/0/08/Tunisia.png/revision/latest?cb=20260709081947",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Turkey",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/b/b3/Turkey.png/revision/latest?cb=20260709082005",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "United States",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/3/32/United_States.png/revision/latest?cb=20260709082055",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Uruguay",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/29/Uruguay.png/revision/latest?cb=20260709082111",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Uzbekistan",
+    "multiplier": 4.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/1/14/Uzbekistan.png/revision/latest?cb=20260709082132",
+    "desc": "Live Match Events."
+  },
+  {
+    "name": "Comet-struck",
+    "multiplier": 2.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/1/15/Cometstruck.webp/revision/latest?cb=20250817153057",
+    "desc": "Randomized."
+  },
+  {
+    "name": "Snowy",
+    "multiplier": 2,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/a/a7/Snowy.png/revision/latest?cb=20250817152901",
+    "desc": "Randomized."
+  },
+  {
+    "name": "Wet",
+    "multiplier": 1.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/b/be/Wet.png/revision/latest?cb=20250817152946",
+    "desc": "Randomized."
+  }
+]

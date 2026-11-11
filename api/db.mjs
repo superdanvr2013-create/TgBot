@@ -88,6 +88,18 @@ export default async function handler(req, res) {
         );
         return json(res, 200, { ok: true, rows: rows.rows });
       }
+      if (table === "mutations") {
+        const rows = await withRetry(() =>
+          getPool().query("SELECT id, name, multi, icon, description, updated_at FROM mutations ORDER BY name")
+        );
+        return json(res, 200, { ok: true, rows: rows.rows });
+      }
+      if (table === "traits") {
+        const rows = await withRetry(() =>
+          getPool().query("SELECT id, name, multiplier, icon, description, updated_at FROM traits ORDER BY name")
+        );
+        return json(res, 200, { ok: true, rows: rows.rows });
+      }
       if (table === "words") {
         const params = [];
         let where = "";
@@ -281,6 +293,48 @@ export default async function handler(req, res) {
         if (op === "delete") {
           if (!Number.isInteger(body.id)) return json(res, 400, { error: "id обязателен" });
           await withRetry(() => getPool().query("DELETE FROM individual WHERE id=$1", [body.id]));
+          return json(res, 200, { ok: true });
+        }
+      }
+
+      // ── mutations / traits (справочники) ───────────────────────────
+      if (table === "mutations" || table === "traits") {
+        const isMut = table === "mutations";
+        const multField = isMut ? "multi" : "multiplier";
+        const idField = "id";
+        
+        if (op === "add") {
+          const err = bad(body.name, "name");
+          if (err) return json(res, 400, { error: err });
+          const mult = Number(body[multField] || 1);
+          const r = await withRetry(() =>
+            getPool().query(
+              `INSERT INTO ${table} (name, ${multField}, icon, description)
+               VALUES ($1,$2,$3,$4)
+               ON CONFLICT (name) DO UPDATE SET ${multField}=EXCLUDED.${multField}, icon=EXCLUDED.icon, description=EXCLUDED.description, updated_at=now()
+               RETURNING ${idField}`,
+              [body.name, mult, body.icon ?? null, body.description ?? null]
+            )
+          );
+          return json(res, 200, { ok: true, id: r.rows[0][idField] });
+        }
+        if (op === "update") {
+          const err = bad(body.name, "name");
+          if (err || !Number.isInteger(body.id)) return json(res, 400, { error: err || "id обязателен" });
+          const mult = Number(body[multField] || 1);
+          const r = await withRetry(() =>
+            getPool().query(
+              `UPDATE ${table} SET name=$1, ${multField}=$2, icon=$3, description=$4, updated_at=now()
+               WHERE ${idField}=$5 RETURNING ${idField}`,
+              [body.name, mult, body.icon ?? null, body.description ?? null, body.id]
+            )
+          );
+          if (!r.rows.length) return json(res, 404, { ok: false, error: `Запись id=${body.id} не найдена` });
+          return json(res, 200, { ok: true, id: r.rows[0][idField] });
+        }
+        if (op === "delete") {
+          if (!Number.isInteger(body.id)) return json(res, 400, { error: "id обязателен" });
+          await withRetry(() => getPool().query(`DELETE FROM ${table} WHERE ${idField}=$1`, [body.id]));
           return json(res, 200, { ok: true });
         }
       }

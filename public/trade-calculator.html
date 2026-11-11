@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Калькулятор трейда брейнротов</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, Segoe UI, sans-serif; background: #0f0f17; color: #eee; padding: 16px; }
+  h1 { font-size: 22px; margin-bottom: 12px; color: #fbbf24; }
+  .subtitle { color: #888; font-size: 13px; margin-bottom: 16px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .side { background: #1a1a26; border-radius: 10px; padding: 14px; }
+  .side.left { border-left: 4px solid #22c55e; }
+  .side.right { border-left: 4px solid #ef4444; }
+  .side h2 { font-size: 16px; margin-bottom: 10px; }
+  .side.left h2 { color: #22c55e; }
+  .side.right h2 { color: #ef4444; }
+  .brainrot { background: #252532; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+  .brainrot-name { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .brainrot-base { color: #aaa; font-size: 13px; margin-bottom: 6px; }
+  .section-label { font-size: 11px; color: #666; text-transform: uppercase; margin: 8px 0 4px; }
+  select { background: #2a2a3a; color: #eee; border: 1px solid #444; border-radius: 6px; padding: 6px 8px; font-size: 13px; width: 100%; }
+  select[multiple] { min-height: 90px; padding: 4px; }
+  .radio-list { display: flex; flex-direction: column; gap: 4px; max-height: 140px; overflow-y: auto; }
+  .radio-item { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  .radio-item:hover { background: #2a2a3a; }
+  .radio-item input { margin: 0; }
+  .radio-item img { width: 20px; height: 20px; border-radius: 3px; }
+  .radio-item .mult { color: #fbbf24; font-weight: 600; margin-left: auto; font-size: 12px; }
+  .checkbox-list { display: flex; flex-direction: column; gap: 3px; max-height: 130px; overflow-y: auto; }
+  .checkbox-item { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  .checkbox-item:hover { background: #2a2a3a; }
+  .checkbox-item input { margin: 0; }
+  .checkbox-item img { width: 20px; height: 20px; border-radius: 3px; }
+  .checkbox-item .mult { color: #fbbf24; font-weight: 600; margin-left: auto; font-size: 12px; }
+  .price { background: #1a3a2a; border-radius: 6px; padding: 8px 10px; margin-top: 8px; font-size: 14px; }
+  .price strong { color: #22c55e; font-size: 16px; }
+  .total { text-align: center; margin-top: 16px; padding: 14px; border-radius: 10px; font-size: 16px; }
+  .total.win { background: #14532d; color: #4ade80; }
+  .total.lose { background: #450a0a; color: #f87171; }
+  .total .label { font-size: 13px; color: #aaa; }
+  .total .value { font-size: 24px; font-weight: 700; margin: 4px 0; }
+  .total .diff { font-size: 13px; color: #888; }
+  .close-btn { display: block; width: 100%; margin-top: 12px; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .close-btn:hover { background: #2563eb; }
+  .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 6px; margin-top: 12px; }
+  .icon-card { background: #252532; border-radius: 6px; padding: 6px; text-align: center; }
+  .icon-card img { width: 36px; height: 36px; margin-bottom: 4px; }
+  .icon-card .name { font-size: 11px; font-weight: 600; }
+  .icon-card .mult { font-size: 11px; color: #fbbf24; }
+</style>
+</head>
+<body>
+<h1>🧮 Калькулятор трейда брейнротов</h1>
+<p class="subtitle">Слева — что отдаёшь, справа — что получаешь. Выбирай мутации (радио) и трейты (чекбоксы) для каждого.</p>
+
+<div class="grid">
+  <div class="side left">
+    <h2>📤 Мои брейнроты</h2>
+    <div id="leftList"></div>
+  </div>
+  <div class="side right">
+    <h2>📥 Их брейнроты</h2>
+    <div id="rightList"></div>
+  </div>
+</div>
+
+<div id="totalBox" class="total" style="display:none">
+  <div class="label">Итог сделки</div>
+  <div class="value" id="totalValue"></div>
+  <div class="diff" id="totalDiff"></div>
+</div>
+
+<div class="section-label" style="margin-top:20px">Справочник мутаций</div>
+<div class="icon-grid" id="mutIcons"></div>
+<div class="section-label">Справочник трейтов</div>
+<div class="icon-grid" id="traitIcons"></div>
+
+<button class="close-btn" onclick="window.close()">Закрыть</button>
+
+<script>
+const POLL_SECRET = new URLSearchParams(location.search).get("secret") || "";
+const API = "/api/trade-data";
+let data = null;
+
+// Формат чисел: 500M, 1.25B, 325K
+function fmt(n) {
+  if (n >= 1e15) return (n / 1e15).toFixed(2).replace(/\.?0+$/, "") + "Q";
+  if (n >= 1e12) return (n / 1e12).toFixed(2).replace(/\.?0+$/, "") + "T";
+  if (n >= 1e9) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
+  return String(Math.round(n));
+}
+
+function parseIncome(str) {
+  if (!str) return 0;
+  const m = String(str).replace(/[$,\s]/g, "").match(/([\d.]+)\s*([KMB])?/i);
+  if (!m) return 0;
+  let v = parseFloat(m[1]);
+  const u = (m[2] || "").toUpperCase();
+  if (u === "M") v *= 1e6;
+  else if (u === "K") v *= 1e3;
+  else if (u === "B") v *= 1e9;
+  return v;
+}
+
+function makeRadioList(container, items, groupName) {
+  const div = document.createElement("div");
+  div.className = "radio-list";
+  items.forEach((it, i) => {
+    const label = document.createElement("label");
+    label.className = "radio-item";
+    label.innerHTML = `<input type="radio" name="${groupName}" value="${i}"> <img src="${it.icon}" onerror="this.style.display='none'"> <span>${it.name}</span> <span class="mult">${it.multi}×</span>`;
+    div.appendChild(label);
+  });
+  container.appendChild(div);
+}
+
+function makeCheckboxList(container, items, groupName) {
+  const div = document.createElement("div");
+  div.className = "checkbox-list";
+  items.forEach((it, i) => {
+    const label = document.createElement("label");
+    label.className = "checkbox-item";
+    label.innerHTML = `<input type="checkbox" name="${groupName}" value="${i}"> <img src="${it.icon}" onerror="this.style.display='none'"> <span>${it.name}</span> <span class="mult">${it.multiplier}×</span>`;
+    div.appendChild(label);
+  });
+  container.appendChild(div);
+}
+
+function calcBrainrot(name, mutIdx, traitIdxs, basePrice) {
+  let price = basePrice;
+  let multi = 1;
+  if (mutIdx !== null && mutIdx !== undefined && data.mutations[mutIdx]) {
+    multi = data.mutations[mutIdx].multi;
+  }
+  // Трейты СУММИРУЮТСЯ (не умножаются)
+  let traitsSum = 0;
+  traitIdxs.forEach((ti) => {
+    if (data.traits[ti]) traitsSum += data.traits[ti].multiplier;
+  });
+  const traitsMult = traitsSum > 0 ? traitsSum : 1; // если ничего не выбрано — ×1
+  return { price: price * multi * traitsMult, multi, traitsMult };
+}
+
+function render() {
+  const leftDiv = document.getElementById("leftList");
+  const rightDiv = document.getElementById("rightList");
+  leftDiv.innerHTML = "";
+  rightDiv.innerHTML = "";
+
+  let totalLeft = 0, totalRight = 0;
+
+  function renderSide(names, container, side) {
+    names.forEach((name, i) => {
+      const card = document.createElement("div");
+      card.className = "brainrot";
+      card.innerHTML = `<div class="brainrot-name">${name}</div><div class="brainrot-base">Базовая цена: <span id="base-${side}-${i}">?</span></div>`;
+
+      // Мутации (радио)
+      const mutLabel = document.createElement("div");
+      mutLabel.className = "section-label";
+      mutLabel.textContent = "Мутация (выбери одну)";
+      card.appendChild(mutLabel);
+      makeRadioList(card, data.mutations, `mut-${side}-${i}`);
+
+      // Трейты (чекбоксы)
+      const traitLabel = document.createElement("div");
+      traitLabel.className = "section-label";
+      traitLabel.textContent = "Трейты (можно несколько)";
+      card.appendChild(traitLabel);
+      makeCheckboxList(card, data.traits, `trait-${side}-${i}`);
+
+      // Цена
+      const priceDiv = document.createElement("div");
+      priceDiv.className = "price";
+      priceDiv.id = `price-${side}-${i}`;
+      priceDiv.innerHTML = `<strong>Цена: <span class="price-value">—</span></strong>`;
+      card.appendChild(priceDiv);
+
+      container.appendChild(card);
+    });
+  }
+
+  renderSide(data.left, leftDiv, "left");
+  renderSide(data.right, rightDiv, "right");
+
+  // Иконки справочника
+  document.getElementById("mutIcons").innerHTML = data.mutations.map((m) => `<div class="icon-card"><img src="${m.icon}" onerror="this.style.display='none'"><div class="name">${m.name}</div><div class="mult">${m.multi}×</div></div>`).join("");
+  document.getElementById("traitIcons").innerHTML = data.traits.map((t) => `<div class="icon-card"><img src="${t.icon}" onerror="this.style.display='none'"><div class="name">${t.name}</div><div class="mult">${t.multiplier}×</div></div>`).join("");
+
+  // Слушатели изменений
+  document.querySelectorAll("input[type=radio], input[type=checkbox]").forEach((el) => {
+    el.addEventListener("change", () => {
+      const match = el.name.match(/(mut|trait)-(left|right)-(\d+)/);
+      if (!match) return;
+      const [, kind, side, idx] = match;
+      const names = side === "left" ? data.left : data.right;
+      const name = names[idx];
+      const mutIdx = document.querySelector(`input[name=mut-${side}-${idx}]:checked`)?.value ?? null;
+      const traitIdxs = [...document.querySelectorAll(`input[name=trait-${side}-${idx}]:checked`)].map((c) => Number(c.value));
+      const basePrice = parseIncome(document.getElementById(`base-${side}-${idx}`)?.textContent || "0");
+      const { price } = calcBrainrot(name, mutIdx !== null ? Number(mutIdx) : null, traitIdxs, basePrice);
+      document.querySelector(`#price-${side}-${idx} .price-value`).textContent = fmt(price);
+      updateTotal();
+    });
+  });
+
+  function updateTotal() {
+    let l = 0, r = 0;
+    data.left.forEach((_, i) => {
+      const v = document.querySelector(`#price-left-${i} .price-value`)?.textContent;
+      l += v && v !== "—" ? parseIncome(v) : 0;
+    });
+    data.right.forEach((_, i) => {
+      const v = document.querySelector(`#price-right-${i} .price-value`)?.textContent;
+      r += v && v !== "—" ? v : 0;
+    });
+    const box = document.getElementById("totalBox");
+    if (l > 0 || r > 0) {
+      box.style.display = "block";
+      const diff = r - l;
+      box.className = "total " + (diff >= 0 ? "win" : "lose");
+      document.getElementById("totalValue").textContent = `Мои: ${fmt(l)} ↔ Их: ${fmt(r)}`;
+      document.getElementById("totalDiff").textContent = diff >= 0 ? `✅ Выгодно! Плюс ${fmt(diff)}` : `❌ Невыгодно. Минус ${fmt(-diff)}`;
+    } else {
+      box.style.display = "none";
+    }
+  }
+
+  // Подставляем базовые цены из RAG (темы = имена брейнротов)
+  const baseMap = data.basePrices || {};
+
+  function fillBase(side, names) {
+    names.forEach((name, i) => {
+      const el = document.getElementById(`base-${side}-${i}`);
+      const key = name.toLowerCase();
+      if (el) el.textContent = baseMap[key] !== undefined ? fmt(baseMap[key]) : "—";
+    });
+  }
+  fillBase("left", data.left);
+  fillBase("right", data.right);
+}
+
+async function init() {
+  const params = new URLSearchParams(location.search);
+  const left = (params.get("left") || "").split("|").filter(Boolean);
+  const right = (params.get("right") || "").split("|").filter(Boolean);
+  const r = await fetch(`${API}?left=${encodeURIComponent(left.join("|"))}&right=${encodeURIComponent(right.join("|"))}`, {
+    headers: { Authorization: `Bearer ${POLL_SECRET}` },
+  });
+  data = await r.json();
+  if (!data.ok) { document.body.innerHTML = `<h1>Ошибка: ${data.error}</h1>`; return; }
+  render();
+}
+
+init();
+</script>
+</body>
+</html>

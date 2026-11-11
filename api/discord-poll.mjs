@@ -92,6 +92,36 @@ async function askAiWithImages(userText, imageDataUrls, ragContext, username) {
   ]);
 }
 
+// ── Trade-calculator: генерирует ссылку на окно калькулятора ───────────────
+// Ищет имена брейнротов в ответе ИИ и строит URL с параметрами left/right.
+// Левые (зелёные на скрине) — первые найденные, правые — остальные.
+const CALC_URL = "https://dan-games-discord-poller.vercel.app/trade-calculator.html";
+
+function buildTradeUrl(answerText, imageDataUrls) {
+  // Ищем имена брейнротов: строки вида "Name — income: $X/s" или "N. Name" или просто названия.
+  const candidates = new Set();
+  const lines = answerText.split(/[\n\r]+/);
+  for (const line of lines) {
+    const m = line.match(/^\s*\d+[.)]\s*(.+?)(?:\s+[—–-]\s+income|\s*$)/);
+    if (m) candidates.add(m[1].trim());
+    // также по известным паттернам: "Hydra Dragon Cannelloni", "Garama and Madundung"
+    const known = ["Hydra Dragon Cannelloni", "Garama and Madundung", "Tictac Sahur", "Ketupat Kepat", "Nuclearo Dinossauro", "Chicli Chicla", "Chicleteira Bicicleteira"];
+    for (const k of known) if (line.includes(k)) candidates.add(k);
+  }
+  if (candidates.size < 2) return null; // мало брейнротов — калькулятор не нужен
+
+  const names = [...candidates];
+  const left = names.slice(0, Math.ceil(names.length / 2));
+  const right = names.slice(Math.ceil(names.length / 2));
+  const secret = process.env.POLL_SECRET || "";
+  const qs = new URLSearchParams({
+    left: left.join("|"),
+    right: right.join("|"),
+    secret,
+  });
+  return `${CALC_URL}?${qs}`;
+}
+
 // ── Скачивание вложений Discord ────────────────────────────────────────────
 
 async function downloadDiscordAttachment(attachment) {
@@ -261,7 +291,20 @@ async function pollChannel(channelId) {
         const userText = content || "Что на этой картинке? Опиши подробно, прочитай текст если есть.";
         let rag = "";
         try { rag = await retrieve(userText); } catch (err) { console.warn("RAG skipped:", err.message); }
-        await sendMessage(channelId, await askAiWithImages(userText, imageDataUrls, rag, message.author?.username));
+        const answer = await askAiWithImages(userText, imageDataUrls, rag, message.author?.username);
+        await sendMessage(channelId, answer);
+
+        // Trade calculator: если в ответе ИИ упомянуты названия брейнротов — показываем ссылку на калькулятор.
+        // Список имён собирается из таблицы knowledge (темы) + из ответа.
+        try {
+          const tradeUrl = buildTradeUrl(answer, imageDataUrls);
+          if (tradeUrl) {
+            await sendMessage(channelId, `🧮 **Открыть калькулятор трейда для этих брейнротов:**\n${tradeUrl}`);
+          }
+        } catch (err) {
+          console.warn("trade url skipped:", err.message);
+        }
+
         processed++;
       } catch (err) {
         console.error("Vision processing error:", err.message);

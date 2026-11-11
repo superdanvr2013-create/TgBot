@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Default",
+    "multi": 1,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/41/Default_Mutation_Icon.png/revision/latest?cb=20251112160311",
+    "desc": "The brainrot retains its original appearance. Been in-game since the beginning."
+  },
+  {
+    "name": "Gold",
+    "multi": 1.25,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/0/0f/Gold_Mutation_Icon.png/revision/latest?cb=20251014022450",
+    "desc": "Turns the mutated brainrot yellow/gold. Been in-game since 31st May 2025. 10% chance to spawn brainrot with this mutation on the Red Carpet."
+  },
+  {
+    "name": "Diamond",
+    "multi": 1.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/2/2c/Diamond_Mutation_Icon.png/revision/latest?cb=20251014022514",
+    "desc": "Turns the mutated brainrot cyan/diamond. Been in-game since 31st May 2025 5% chance to spawn brainrot with this mutation on the Red Carpet."
+  },
+  {
+    "name": "Rainbow",
+    "multi": 10,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/e/e5/Rainbow_Mutation_Icon.png/revision/latest?cb=20251014022647",
+    "desc": "Makes the mutated brainrot cycle between RGB colours. Been in-game since 21st June 2025 1% chance to spawn brainrot with this mutation on the Red Carpet. The chance increases with the Rainbow Machine "
+  },
+  {
+    "name": "Bloodrot",
+    "multi": 2,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/8e/Bloodrot_Mutation_Icon.png/revision/latest?cb=20251014022607",
+    "desc": "Turns the mutated brainrot dark red. Been in-game since Update 2 Unobtainable without Admin Abuse. Mild Chance to apply onto a brainrot during the Bloodmoon event"
+  },
+  {
+    "name": "Candy",
+    "multi": 4,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/4/4a/Candy_Mutation_Icon.png/revision/latest?cb=20251014022832",
+    "desc": "Turns the mutated brainrot pink. Been in-game since 5th July 2025 Unobtainable without Admin Abuse. Mild Chance to apply onto a brainrot during the Candy Aurora event"
+  },
+  {
+    "name": "Lava",
+    "multi": 6,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/88/Lava_Mutation_Icon.png/revision/latest?cb=20251014022920",
+    "desc": "Turns the mutated brainrot neon orange. Been in-game since July 25, 2025 Unobtainable without Admin Abuse. Mild Chance to apply onto a brainrot during the Molten event Formerly Activated every 1/3 hou"
+  },
+  {
+    "name": "Galaxy",
+    "multi": 7,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/7/7b/Galaxy_Mutation_Icon.png/revision/latest?cb=20251014023008",
+    "desc": "Turns the mutated brainrot neon purple. Been in-game since August 23, 2025 Unobtainable without Admin Abuse. Mild Chance to apply onto a brainrot during the Galactic event Formerly Activated every 1/3"
+  },
+  {
+    "name": "Yin Yang",
+    "multi": 7.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/8/83/Yin_Yang_Mutation_Icon.png/revision/latest?cb=20251014023114",
+    "desc": "Turns the mutated brainrot black and white. Been in-game since September 27, 2025 Unobtainable without Admin Abuse. Mild Chance to apply onto a brainrot during the Yin Yang event Formerly Activated ev"
+  },
+  {
+    "name": "Radioactive",
+    "multi": 8.5,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/d/d4/Radioactive_Mutation_Icon.png/revision/latest?cb=20260314224939",
+    "desc": "Turns the mutated brainrot neon green and applies a hatch texture on it. Been in-game since November 15, 2025. Unobtainable without Admin Abuse. Mild Chance to apply onto a brainrot during the Radioac"
+  },
+  {
+    "name": "Cursed",
+    "multi": 9,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/9/94/Cursed_Mutation_Icon.png/revision/latest?cb=20260314225017",
+    "desc": "Turns the mutated brainrot red and black. Also applies a texture with red symbols that covers most of the brainrot's body. It also gives the brainrot red eyes, similar to the Tung Tung Attack trait. B"
+  },
+  {
+    "name": "Divine",
+    "multi": 10,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/d/d4/Divine_Mutation_Icon.png/revision/latest?cb=20260222035304",
+    "desc": "Turns the mutated brainrot bright yellow and white. Also applies a texture with white symbols that covers most of the brainrot's body. Been in-game since Feb. 21, 2026. Unobtainable without Admin Abus"
+  },
+  {
+    "name": "Cyber",
+    "multi": 11,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/d/d8/Cyber_Mutation_Icon.png/revision/latest?cb=20260520201734",
+    "desc": "Turns the mutated brainrot Black and Blue. Also makes the brainrot transparent, or neon with cybernetic pattern, on some parts of the body. Been in-game from Apr. 18, 2026. Unobtainable without Admin "
+  },
+  {
+    "name": "Phantom",
+    "multi": 12,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/6/6d/Phantom_Mutation_Icon.png/revision/latest?cb=20260615120847",
+    "desc": "Makes the brainrot a transparent black. constantly flashing in and out of transparency. Then certain parts (eyes, teeth etc.) flash white rapidly, and the brainrot's VFX is changed to black instead of"
+  },
+  {
+    "name": "Crystal",
+    "multi": 13,
+    "icon": "https://static.wikia.nocookie.net/stealabr/images/e/ef/Crystal_Mutation_Icon.png/revision/latest?cb=20260729023605",
+    "desc": "Turns the brainrot colour to purple and blue when mutated.Content some white colour and some flashing VFX released on July. 25, 2026. Mild Chance to apply onto a brainrot during the Crystal event. Act"
+  }
+]
