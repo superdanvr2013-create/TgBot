@@ -97,20 +97,29 @@ async function askAiWithImages(userText, imageDataUrls, ragContext, username) {
 // Левые (зелёные на скрине) — первые найденные, правые — остальные.
 const CALC_URL = "https://dan-games-discord-poller.vercel.app/trade-calculator.html";
 
-function buildTradeUrl(answerText, imageDataUrls) {
-  // Ищем имена брейнротов: строки вида "Name — income: $X/s" или "N. Name" или просто названия.
-  const candidates = new Set();
-  const lines = answerText.split(/[\n\r]+/);
-  for (const line of lines) {
-    const m = line.match(/^\s*\d+[.)]\s*(.+?)(?:\s+[—–-]\s+income|\s*$)/);
-    if (m) candidates.add(m[1].trim());
-    // также по известным паттернам: "Hydra Dragon Cannelloni", "Garama and Madundung"
-    const known = ["Hydra Dragon Cannelloni", "Garama and Madundung", "Tictac Sahur", "Ketupat Kepat", "Nuclearo Dinossauro", "Chicli Chicla", "Chicleteira Bicicleteira"];
-    for (const k of known) if (line.includes(k)) candidates.add(k);
+// Просит ИИ вытащить имена брейнротов из картинки в чистом JSON-формате.
+async function extractBrainrotNames(imageDataUrls) {
+  const system =
+    "Извлеки названия брейнротов с картинки. " +
+    "Верни строго JSON-массив: [\"Name1\", \"Name2\"]. " +
+    "Без пояснений, только JSON. Если брейнротов нет — [].";
+  const answer = await askModel([
+    { role: "system", content: system },
+    { role: "user", content: buildVisionContent("Вытащи имена брейнротов.", imageDataUrls) },
+  ]);
+  try {
+    const cleaned = answer.trim().replace(/^```json\s*|\s*```$/g, "");
+    const arr = JSON.parse(cleaned);
+    return Array.isArray(arr) ? arr.filter((x) => typeof x === "string") : [];
+  } catch {
+    // fallback: пытаемся вытащить из текста
+    const matches = answer.match(/"([^"]+)"/g);
+    return matches ? matches.map((x) => x.replace(/"/g, "")) : [];
   }
-  if (candidates.size < 2) return null; // мало брейнротов — калькулятор не нужен
+}
 
-  const names = [...candidates];
+function buildTradeUrl(names) {
+  if (names.length < 2) return null;
   const left = names.slice(0, Math.ceil(names.length / 2));
   const right = names.slice(Math.ceil(names.length / 2));
   const secret = process.env.POLL_SECRET || "";
@@ -291,18 +300,25 @@ async function pollChannel(channelId) {
         const userText = content || "Что на этой картинке? Опиши подробно, прочитай текст если есть.";
         let rag = "";
         try { rag = await retrieve(userText); } catch (err) { console.warn("RAG skipped:", err.message); }
-        const answer = await askAiWithImages(userText, imageDataUrls, rag, message.author?.username);
-        await sendMessage(channelId, answer);
 
-        // Trade calculator: если в ответе ИИ упомянуты названия брейнротов — показываем ссылку на калькулятор.
-        // Список имён собирается из таблицы knowledge (темы) + из ответа.
+        // Извлекаем имена брейнротов через OCR (JSON-формат, чистый).
+        let brainrotNames = [];
         try {
-          const tradeUrl = buildTradeUrl(answer, imageDataUrls);
-          if (tradeUrl) {
-            await sendMessage(channelId, `🧮 **Открыть калькулятор трейда для этих брейнротов:**\n${tradeUrl}`);
-          }
+          brainrotNames = await extractBrainrotNames(imageDataUrls);
         } catch (err) {
-          console.warn("trade url skipped:", err.message);
+          console.warn("extract brainrots failed:", err.message);
+        }
+
+        // Если нашли брейнротов — открываем калькулятор, иначе обычный vision-ответ.
+        if (brainrotNames.length > 0) {
+          const tradeUrl = buildTradeUrl(brainrotNames);
+          if (tradeUrl) {
+            await sendMessage(channelId, `🧮 **Калькулятор трейда открыт:**\n${tradeUrl}`);
+          } else {
+            await sendMessage(channelId, "Нашёл брейнротов, но их слишком мало для трейда.");
+          }
+        } else {
+          await sendMessage(channelId, await askAiWithImages(userText, imageDataUrls, rag, message.author?.username));
         }
 
         processed++;

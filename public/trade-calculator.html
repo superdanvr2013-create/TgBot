@@ -216,7 +216,7 @@ function render() {
     });
     data.right.forEach((_, i) => {
       const v = document.querySelector(`#price-right-${i} .price-value`)?.textContent;
-      r += v && v !== "—" ? v : 0;
+      r += v && v !== "—" ? parseIncome(v) : 0;
     });
     const box = document.getElementById("totalBox");
     if (l > 0 || r > 0) {
