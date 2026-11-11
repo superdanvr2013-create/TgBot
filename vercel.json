@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "public": true,
   "functions": {
     "api/discord-poll.mjs": {
       "maxDuration": 60
