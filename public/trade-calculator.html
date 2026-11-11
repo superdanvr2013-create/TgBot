@@ -80,7 +80,7 @@
 <button class="close-btn" onclick="window.close()">Закрыть</button>
 
 <script>
-const POLL_SECRET = new URLSearchParams(location.search).get("secret") || "";
+const POLL_SECRET = decodeURIComponent(new URLSearchParams(location.search).get("secret") || "");
 const API = "/api/trade-data";
 let data = null;
 

@@ -126,7 +126,7 @@ function buildTradeUrl(names) {
   const qs = new URLSearchParams({
     left: left.join("|"),
     right: right.join("|"),
-    secret,
+    secret: encodeURIComponent(secret),
   });
   return `${CALC_URL}?${qs}`;
 }
